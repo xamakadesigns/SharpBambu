@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="echo $(ProjectDir)&#xD;&#xA;copy $(ProjectDir)\..\NetworkPluginWrapper\Debug\NetworkPluginWrapper.dll $(ProjectDir)\bin\Debug\net6.0\NetworkPluginWrapper.dll" />
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetworkPluginWrapper\NetworkPluginWrapper.vcxproj">
+      <Private>True</Private>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <ReferenceOutputAssembly>True</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>
