@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SharpBambuTestApp": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

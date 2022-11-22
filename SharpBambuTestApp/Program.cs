@@ -12,7 +12,7 @@ networkPlugin.InitializeNetworkPlugin();
 
 Console.WriteLine($"Version {networkPlugin.GetNetworkPluginVersion()}");
 
-networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
+//networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
 // m_agent->set_cert_file(resources_dir() + "/cert", "slicer_base64.cer");
 
 
@@ -33,7 +33,7 @@ networkPlugin.Start();
 
 //networkPlugin.ConnectServer();
 
-//networkPlugin.SetConfigFolder(networkPlugin.ApplicationFolder);
+networkPlugin.SetConfigFolder(networkPlugin.ApplicationFolder);
 
 try
 {
@@ -41,7 +41,8 @@ try
     //Console.WriteLine($"User Name: {networkPlugin.GetUserName()}");
     //Console.WriteLine($"User Nickname: {networkPlugin.GetUserNickname()}");
     //Console.WriteLine($"User Avatar: {networkPlugin.GetUserAvatar()}");
-    Console.WriteLine($"Build Login CMD: {networkPlugin.GetUserId()}");
+    //Console.WriteLine($"Build Login CMD: {networkPlugin.BuildLoginCmd()}");
+
     networkPlugin.DisconnectPrinter();
 }
 catch(Exception ex)

@@ -41,80 +41,80 @@ namespace Test
         private UIntPtr Agent { get; set; }
 
         #region DLL Imports
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int initialize_network_module();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern void set_dll_dir([In, MarshalAs(UnmanagedType.LPStr)] string dllDir);
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern void set_dll_dir([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder dllDir);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern void set_data_dir([In, MarshalAs(UnmanagedType.LPStr)] string dataDir);
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern void set_data_dir([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder dataDir);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern UIntPtr bambu_network_create_agent();
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int bambu_network_destroy_agent();
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int init_log();
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern int set_config_dir([In, MarshalAs(UnmanagedType.LPStr)] string path);
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int set_config_dir([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder path);
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_version();
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int connect_server();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int connect_printer();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int disconnect_printer();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int start();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern bool is_server_connected();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string build_login_info();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string build_logout_cmd();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string build_login_cmd();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_user_id();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_user_name();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_user_nickanme();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_user_avatar();
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
 
         
@@ -138,33 +138,33 @@ namespace Test
         private delegate void OnResultDelegate(int retcode, string info);
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_user_login_fn(OnUserLoginDelegate callbackFunction);
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_ssdp_msg_fn(OnSSDPMessageDelegate callbackFunction);
 
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_printer_connected_fn(OnPrinterConnectedDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_server_connected_fn(OnServerConnectedDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_http_error_fn(OnHttpErrorDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_get_country_code_fn(OnGetCountryCodeDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_message_fn(OnPrinterMessageDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_local_connect_fn(OnLocalConnectedDelegate callbackFunction);
 
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_local_message_fn(OnLocalMessageDelegate callbackFunction);
 
 
@@ -290,10 +290,10 @@ namespace Test
             ResolveBambuNetworkingDll(autoUpdateDll);
 
             Debug.Print($"Setting data dir to {BambuStudioDataFolder}");
-            set_data_dir(BambuStudioDataFolder);
+            set_data_dir(new StringBuilder(BambuStudioDataFolder));
 
             Debug.Print($"Setting dll dir to {BambuStudioPluginFolder}");
-            set_dll_dir(BambuStudioPluginFolder);
+            set_dll_dir(new StringBuilder(BambuStudioPluginFolder));
 
             Debug.Print("Initialize network agent wrapper dll");
             var result = initialize_network_module();
@@ -417,7 +417,7 @@ namespace Test
                 BambuNetworkPluginConfigFolder = folderPath;
             }
 
-            var result = set_config_dir(folderPath);
+            var result = set_config_dir(new StringBuilder(folderPath));
 
             if (result != 0)
             {

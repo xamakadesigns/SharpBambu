@@ -15,30 +15,27 @@
 #pragma comment(lib, "kernel32.lib")
 
 
-//#include <boost/log/trivial.hpp>
-//#include "libslic3r/Utils.hpp"
 #include "NetworkAgent.hpp"
 using namespace std;
-
-
-
 using namespace BBL;
 
 namespace Slic3r {
 
+void* network_agent{ nullptr };
+
 //#define BAMBU_SOURCE_LIBRARY "BambuSource"
 
 #if defined(_MSC_VER) || defined(_WIN32)
-static HMODULE netwoking_module = NULL;
-static HMODULE source_module = NULL;
+HMODULE netwoking_module = NULL;
+HMODULE source_module = NULL;
 #else
-static void* netwoking_module = NULL;
-static void* source_module = NULL;
+void* netwoking_module = NULL;
+void* source_module = NULL;
 #endif
 
-static std::string g_dll_dir;
+std::string g_dll_dir;
 
-__declspec(dllexport) void set_dll_dir(const char *dir)
+__declspec(dllexport) void set_dll_dir(char *dir)
 {
     g_dll_dir = dir;
 }
@@ -48,9 +45,9 @@ const std::string& dll_dir()
     return g_dll_dir;
 }
 
-static std::string g_data_dir;
+std::string g_data_dir;
 
-__declspec(dllexport) void set_data_dir(const char* dir)
+__declspec(dllexport) void set_data_dir(char* dir)
 {
     g_data_dir = dir;
 }
@@ -59,71 +56,71 @@ const std::string& data_dir()
 {
     return g_data_dir;
 }
-
-func_check_debug_consistent         check_debug_consistent_ptr = nullptr;
-func_get_version                    get_version_ptr = nullptr;
-func_create_agent                   create_agent_ptr = nullptr;
-func_destroy_agent                  destroy_agent_ptr = nullptr;
-func_init_log                       init_log_ptr = nullptr;
-func_set_config_dir                 set_config_dir_ptr = nullptr;
-func_set_cert_file                  set_cert_file_ptr = nullptr;
-func_set_country_code               set_country_code_ptr = nullptr;
-func_start                          start_ptr = nullptr;
-func_set_on_ssdp_msg_fn             set_on_ssdp_msg_fn_ptr = nullptr;
-func_set_on_user_login_fn           set_on_user_login_fn_ptr = nullptr;
-func_set_on_printer_connected_fn    set_on_printer_connected_fn_ptr = nullptr;
-func_set_on_server_connected_fn     set_on_server_connected_fn_ptr = nullptr;
-func_set_on_http_error_fn           set_on_http_error_fn_ptr = nullptr;
-func_set_get_country_code_fn        set_get_country_code_fn_ptr = nullptr;
-func_set_on_message_fn              set_on_message_fn_ptr = nullptr;
-func_set_on_local_connect_fn        set_on_local_connect_fn_ptr = nullptr;
-func_set_on_local_message_fn        set_on_local_message_fn_ptr = nullptr;
-func_connect_server                 connect_server_ptr = nullptr;
-func_is_server_connected            is_server_connected_ptr = nullptr;
-func_refresh_connection             refresh_connection_ptr = nullptr;
-func_start_subscribe                start_subscribe_ptr = nullptr;
-func_stop_subscribe                 stop_subscribe_ptr = nullptr;
-func_send_message                   send_message_ptr = nullptr;
-func_connect_printer                connect_printer_ptr = nullptr;
-func_disconnect_printer             disconnect_printer_ptr = nullptr;
-func_send_message_to_printer        send_message_to_printer_ptr = nullptr;
-func_start_discovery                start_discovery_ptr = nullptr;
-func_change_user                    change_user_ptr = nullptr;
-func_is_user_login                  is_user_login_ptr = nullptr;
-func_user_logout                    user_logout_ptr = nullptr;
-func_get_user_id                    get_user_id_ptr = nullptr;
-func_get_user_name                  get_user_name_ptr = nullptr;
-func_get_user_avatar                get_user_avatar_ptr = nullptr;
-func_get_user_nickanme              get_user_nickanme_ptr = nullptr;
-func_build_login_cmd                build_login_cmd_ptr = nullptr;
-func_build_logout_cmd               build_logout_cmd_ptr = nullptr;
-func_build_login_info               build_login_info_ptr = nullptr;
-func_bind                           bind_ptr = nullptr;
-func_unbind                         unbind_ptr = nullptr;
-func_get_bambulab_host              get_bambulab_host_ptr = nullptr;
-func_get_user_selected_machine      get_user_selected_machine_ptr = nullptr;
-func_set_user_selected_machine      set_user_selected_machine_ptr = nullptr;
-func_start_print                    start_print_ptr = nullptr;
-func_start_local_print_with_record  start_local_print_with_record_ptr = nullptr;
-func_start_send_gcode_to_sdcard     start_send_gcode_to_sdcard_ptr = nullptr;
-func_start_local_print              start_local_print_ptr = nullptr;
-func_get_user_presets               get_user_presets_ptr = nullptr;
-func_request_setting_id             request_setting_id_ptr = nullptr;
-func_put_setting                    put_setting_ptr = nullptr;
-func_get_setting_list               get_setting_list_ptr = nullptr;
-func_delete_setting                 delete_setting_ptr = nullptr;
-func_get_studio_info_url            get_studio_info_url_ptr = nullptr;
-func_set_extra_http_header          set_extra_http_header_ptr = nullptr;
-func_get_my_message                 get_my_message_ptr = nullptr;
-func_check_user_task_report         check_user_task_report_ptr = nullptr;
-func_get_user_print_info            get_user_print_info_ptr = nullptr;
-func_get_printer_firmware           get_printer_firmware_ptr = nullptr;
-func_get_task_plate_index           get_task_plate_index_ptr = nullptr;
-func_get_slice_info                 get_slice_info_ptr = nullptr;
-func_query_bind_status              query_bind_status_ptr = nullptr;
-func_modify_printer_name            modify_printer_name_ptr = nullptr;
-func_get_camera_url                 get_camera_url_ptr = nullptr;
-func_start_pubilsh                  start_publish_ptr = nullptr;
+//
+//static func_check_debug_consistent         check_debug_consistent_ptr = nullptr;
+//static func_get_version                    get_version_ptr = nullptr;
+//static func_create_agent                   create_agent_ptr = nullptr;
+//static func_destroy_agent                  destroy_agent_ptr = nullptr;
+//static func_init_log                       init_log_ptr = nullptr;
+//static func_set_config_dir                 set_config_dir_ptr = nullptr;
+//static func_set_cert_file                  set_cert_file_ptr = nullptr;
+//static func_set_country_code               set_country_code_ptr = nullptr;
+//static func_start                          start_ptr = nullptr;
+//static func_set_on_ssdp_msg_fn             set_on_ssdp_msg_fn_ptr = nullptr;
+//static func_set_on_user_login_fn           set_on_user_login_fn_ptr = nullptr;
+//static func_set_on_printer_connected_fn    set_on_printer_connected_fn_ptr = nullptr;
+//static func_set_on_server_connected_fn     set_on_server_connected_fn_ptr = nullptr;
+//static func_set_on_http_error_fn           set_on_http_error_fn_ptr = nullptr;
+//static func_set_get_country_code_fn        set_get_country_code_fn_ptr = nullptr;
+//static func_set_on_message_fn              set_on_message_fn_ptr = nullptr;
+//static func_set_on_local_connect_fn        set_on_local_connect_fn_ptr = nullptr;
+//static func_set_on_local_message_fn        set_on_local_message_fn_ptr = nullptr;
+//static func_connect_server                 connect_server_ptr = nullptr;
+//static func_is_server_connected            is_server_connected_ptr = nullptr;
+//static func_refresh_connection             refresh_connection_ptr = nullptr;
+//static func_start_subscribe                start_subscribe_ptr = nullptr;
+//static func_stop_subscribe                 stop_subscribe_ptr = nullptr;
+//static func_send_message                   send_message_ptr = nullptr;
+//static func_connect_printer                connect_printer_ptr = nullptr;
+//static func_disconnect_printer             disconnect_printer_ptr = nullptr;
+//static func_send_message_to_printer        send_message_to_printer_ptr = nullptr;
+//static func_start_discovery                start_discovery_ptr = nullptr;
+//static func_change_user                    change_user_ptr = nullptr;
+//static func_is_user_login                  is_user_login_ptr = nullptr;
+//static func_user_logout                    user_logout_ptr = nullptr;
+//static func_get_user_id                    get_user_id_ptr = nullptr;
+//static func_get_user_name                  get_user_name_ptr = nullptr;
+//static func_get_user_avatar                get_user_avatar_ptr = nullptr;
+//static func_get_user_nickanme              get_user_nickanme_ptr = nullptr;
+//static func_build_login_cmd                build_login_cmd_ptr = nullptr;
+//static func_build_logout_cmd               build_logout_cmd_ptr = nullptr;
+//static func_build_login_info               build_login_info_ptr = nullptr;
+//static func_bind                           bind_ptr = nullptr;
+//static func_unbind                         unbind_ptr = nullptr;
+//static func_get_bambulab_host              get_bambulab_host_ptr = nullptr;
+//static func_get_user_selected_machine      get_user_selected_machine_ptr = nullptr;
+//static func_set_user_selected_machine      set_user_selected_machine_ptr = nullptr;
+//static func_start_print                    start_print_ptr = nullptr;
+//static func_start_local_print_with_record  start_local_print_with_record_ptr = nullptr;
+//static func_start_send_gcode_to_sdcard     start_send_gcode_to_sdcard_ptr = nullptr;
+//static func_start_local_print              start_local_print_ptr = nullptr;
+//static func_get_user_presets               get_user_presets_ptr = nullptr;
+//static func_request_setting_id             request_setting_id_ptr = nullptr;
+//static func_put_setting                    put_setting_ptr = nullptr;
+//static func_get_setting_list               get_setting_list_ptr = nullptr;
+//static func_delete_setting                 delete_setting_ptr = nullptr;
+//static func_get_studio_info_url            get_studio_info_url_ptr = nullptr;
+//static func_set_extra_http_header          set_extra_http_header_ptr = nullptr;
+//static func_get_my_message                 get_my_message_ptr = nullptr;
+//static func_check_user_task_report         check_user_task_report_ptr = nullptr;
+//static func_get_user_print_info            get_user_print_info_ptr = nullptr;
+//static func_get_printer_firmware           get_printer_firmware_ptr = nullptr;
+//static func_get_task_plate_index           get_task_plate_index_ptr = nullptr;
+//static func_get_slice_info                 get_slice_info_ptr = nullptr;
+//static func_query_bind_status              query_bind_status_ptr = nullptr;
+//static func_modify_printer_name            modify_printer_name_ptr = nullptr;
+//static func_get_camera_url                 get_camera_url_ptr = nullptr;
+//static func_start_pubilsh                  start_publish_ptr = nullptr;
 
 
 __declspec(dllexport) void* bambu_network_create_agent()
@@ -422,6 +419,10 @@ void* get_network_function(const char* name)
     if (!function) {
         BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(", can not find function %1%")%name;
     }
+    else
+    {
+        BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(", found %1% at %2%") % name %function;
+    }
     return function;
 }
 
@@ -466,8 +467,10 @@ __declspec(dllexport) int init_log()
     return ret;
 }
 
-__declspec(dllexport) int set_config_dir(const char* config_dir)
+__declspec(dllexport) int set_config_dir(char* config_dir)
 {
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" data_dir %1% dll_dir=%2%") % data_dir() % dll_dir();
+
     int ret = 0;
     if (network_agent && set_config_dir_ptr) {
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" agent %1% setting config dir=%2%") % network_agent % config_dir;
@@ -721,7 +724,7 @@ __declspec(dllexport) bool start_discovery(bool start, bool sending)
     return ret;
 }
 
-__declspec(dllexport) int  change_user(char* user_info)
+__declspec(dllexport) int change_user(char* user_info)
 {
     int ret = 0;
     if (network_agent && change_user_ptr) {
@@ -758,7 +761,8 @@ __declspec(dllexport) BSTR get_user_id()
     if (network_agent && get_user_id_ptr) {
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", start");
         ret = get_user_id_ptr(network_agent);
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", result %1%") % ret;
+        //get_user_id_ptr(network_agent);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", result %1%") %ret;
     }
 
     _bstr_t bstr = ret.c_str();
@@ -1049,7 +1053,7 @@ __declspec(dllexport) int get_task_plate_index(std::string task_id, int* plate_i
 
 __declspec(dllexport) int get_slice_info(std::string project_id, std::string profile_id, int plate_index, std::string* slice_json)
 {
-    int ret;
+    int ret = 0;
     if (network_agent && get_slice_info_ptr) {
         ret = get_slice_info_ptr(network_agent, project_id, profile_id, plate_index, slice_json);
         BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" : network_agent=%1%, project_id=%2%, profile_id=%3%, plate_index=%4%, slice_json=%5%")
@@ -1060,7 +1064,7 @@ __declspec(dllexport) int get_slice_info(std::string project_id, std::string pro
 
 __declspec(dllexport) int query_bind_status(std::vector<std::string> query_list, unsigned int* http_code, std::string* http_body)
 {
-    int ret;
+    int ret = 0;
     if (network_agent && query_bind_status_ptr) {
         ret = query_bind_status_ptr(network_agent, query_list, http_code, http_body);
         if (ret)
