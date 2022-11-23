@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include <comutil.h>
 #include <oleauto.h>
 #include <wtypes.h>
@@ -14,7 +15,6 @@
 #pragma comment(lib, "comsuppw.lib")
 #pragma comment(lib, "kernel32.lib")
 
-
 #include "NetworkAgent.hpp"
 using namespace std;
 using namespace BBL;
@@ -22,8 +22,6 @@ using namespace BBL;
 namespace Slic3r {
 
 void* network_agent{ nullptr };
-
-//#define BAMBU_SOURCE_LIBRARY "BambuSource"
 
 #if defined(_MSC_VER) || defined(_WIN32)
 HMODULE netwoking_module = NULL;
@@ -56,72 +54,6 @@ const std::string& data_dir()
 {
     return g_data_dir;
 }
-//
-//static func_check_debug_consistent         check_debug_consistent_ptr = nullptr;
-//static func_get_version                    get_version_ptr = nullptr;
-//static func_create_agent                   create_agent_ptr = nullptr;
-//static func_destroy_agent                  destroy_agent_ptr = nullptr;
-//static func_init_log                       init_log_ptr = nullptr;
-//static func_set_config_dir                 set_config_dir_ptr = nullptr;
-//static func_set_cert_file                  set_cert_file_ptr = nullptr;
-//static func_set_country_code               set_country_code_ptr = nullptr;
-//static func_start                          start_ptr = nullptr;
-//static func_set_on_ssdp_msg_fn             set_on_ssdp_msg_fn_ptr = nullptr;
-//static func_set_on_user_login_fn           set_on_user_login_fn_ptr = nullptr;
-//static func_set_on_printer_connected_fn    set_on_printer_connected_fn_ptr = nullptr;
-//static func_set_on_server_connected_fn     set_on_server_connected_fn_ptr = nullptr;
-//static func_set_on_http_error_fn           set_on_http_error_fn_ptr = nullptr;
-//static func_set_get_country_code_fn        set_get_country_code_fn_ptr = nullptr;
-//static func_set_on_message_fn              set_on_message_fn_ptr = nullptr;
-//static func_set_on_local_connect_fn        set_on_local_connect_fn_ptr = nullptr;
-//static func_set_on_local_message_fn        set_on_local_message_fn_ptr = nullptr;
-//static func_connect_server                 connect_server_ptr = nullptr;
-//static func_is_server_connected            is_server_connected_ptr = nullptr;
-//static func_refresh_connection             refresh_connection_ptr = nullptr;
-//static func_start_subscribe                start_subscribe_ptr = nullptr;
-//static func_stop_subscribe                 stop_subscribe_ptr = nullptr;
-//static func_send_message                   send_message_ptr = nullptr;
-//static func_connect_printer                connect_printer_ptr = nullptr;
-//static func_disconnect_printer             disconnect_printer_ptr = nullptr;
-//static func_send_message_to_printer        send_message_to_printer_ptr = nullptr;
-//static func_start_discovery                start_discovery_ptr = nullptr;
-//static func_change_user                    change_user_ptr = nullptr;
-//static func_is_user_login                  is_user_login_ptr = nullptr;
-//static func_user_logout                    user_logout_ptr = nullptr;
-//static func_get_user_id                    get_user_id_ptr = nullptr;
-//static func_get_user_name                  get_user_name_ptr = nullptr;
-//static func_get_user_avatar                get_user_avatar_ptr = nullptr;
-//static func_get_user_nickanme              get_user_nickanme_ptr = nullptr;
-//static func_build_login_cmd                build_login_cmd_ptr = nullptr;
-//static func_build_logout_cmd               build_logout_cmd_ptr = nullptr;
-//static func_build_login_info               build_login_info_ptr = nullptr;
-//static func_bind                           bind_ptr = nullptr;
-//static func_unbind                         unbind_ptr = nullptr;
-//static func_get_bambulab_host              get_bambulab_host_ptr = nullptr;
-//static func_get_user_selected_machine      get_user_selected_machine_ptr = nullptr;
-//static func_set_user_selected_machine      set_user_selected_machine_ptr = nullptr;
-//static func_start_print                    start_print_ptr = nullptr;
-//static func_start_local_print_with_record  start_local_print_with_record_ptr = nullptr;
-//static func_start_send_gcode_to_sdcard     start_send_gcode_to_sdcard_ptr = nullptr;
-//static func_start_local_print              start_local_print_ptr = nullptr;
-//static func_get_user_presets               get_user_presets_ptr = nullptr;
-//static func_request_setting_id             request_setting_id_ptr = nullptr;
-//static func_put_setting                    put_setting_ptr = nullptr;
-//static func_get_setting_list               get_setting_list_ptr = nullptr;
-//static func_delete_setting                 delete_setting_ptr = nullptr;
-//static func_get_studio_info_url            get_studio_info_url_ptr = nullptr;
-//static func_set_extra_http_header          set_extra_http_header_ptr = nullptr;
-//static func_get_my_message                 get_my_message_ptr = nullptr;
-//static func_check_user_task_report         check_user_task_report_ptr = nullptr;
-//static func_get_user_print_info            get_user_print_info_ptr = nullptr;
-//static func_get_printer_firmware           get_printer_firmware_ptr = nullptr;
-//static func_get_task_plate_index           get_task_plate_index_ptr = nullptr;
-//static func_get_slice_info                 get_slice_info_ptr = nullptr;
-//static func_query_bind_status              query_bind_status_ptr = nullptr;
-//static func_modify_printer_name            modify_printer_name_ptr = nullptr;
-//static func_get_camera_url                 get_camera_url_ptr = nullptr;
-//static func_start_pubilsh                  start_publish_ptr = nullptr;
-
 
 __declspec(dllexport) void* bambu_network_create_agent()
 {
@@ -451,7 +383,7 @@ __declspec(dllexport) BSTR get_version()
         BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(", get_version not supported,return 00.00.00.00!");
         ret = "00.00.00.00";
     }
-
+    ret = get_version_ptr();
     _bstr_t bstr = ret.c_str();
     return bstr.Detach();
 }

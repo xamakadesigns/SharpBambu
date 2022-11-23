@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="echo $(ProjectDir)&#xD;&#xA;copy $(ProjectDir)\..\NetworkPluginWrapper\Debug\NetworkPluginWrapper.dll $(ProjectDir)\bin\Debug\net6.0\NetworkPluginWrapper.dll" />
+    <Exec Command="echo $(ProjectDir)&#xD;&#xA;copy $(ProjectDir)\..\NetworkPluginWrapper\Release\NetworkPluginWrapper.dll $(ProjectDir)\bin\Debug\net6.0\NetworkPluginWrapper.dll" />
   </Target>
 
   <ItemGroup>
