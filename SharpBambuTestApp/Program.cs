@@ -12,7 +12,7 @@ networkPlugin.InitializeNetworkPlugin();
 
 Console.WriteLine($"Version {networkPlugin.GetNetworkPluginVersion()}");
 
-//networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
+networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
 // m_agent->set_cert_file(resources_dir() + "/cert", "slicer_base64.cer");
 
 
@@ -31,21 +31,19 @@ else
 
 networkPlugin.Start();
 
-//networkPlugin.ConnectServer();
-
-networkPlugin.SetConfigFolder(networkPlugin.ApplicationFolder);
-
 try
 {
-    //Console.WriteLine($"User ID: {networkPlugin.GetUserId()}");
-    //Console.WriteLine($"User Name: {networkPlugin.GetUserName()}");
-    //Console.WriteLine($"User Nickname: {networkPlugin.GetUserNickname()}");
-    //Console.WriteLine($"User Avatar: {networkPlugin.GetUserAvatar()}");
-    //Console.WriteLine($"Build Login CMD: {networkPlugin.BuildLoginCmd()}");
+    Console.WriteLine($"User ID: {networkPlugin.GetUserId()}");
+    Console.WriteLine($"User Name: {networkPlugin.GetUserName()}");
+    Console.WriteLine($"User Nickname: {networkPlugin.GetUserNickname()}");
+    Console.WriteLine($"User Avatar: {networkPlugin.GetUserAvatar()}");
+    Console.WriteLine($"Build Login CMD: {networkPlugin.BuildLoginCmd()}");
 
-    networkPlugin.DisconnectPrinter();
+    //networkPlugin.ConnectServer();
+
+    //networkPlugin.DisconnectPrinter();
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     // catch and print the exception
     Console.WriteLine("Exception:");

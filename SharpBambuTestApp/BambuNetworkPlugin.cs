@@ -21,7 +21,7 @@ namespace Test
         public string BambuStudioPluginFolder => Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\BambuStudio\\plugins");
 
         /// <summary>
-        /// Example: C:\Users\yourname\AppData\Roaming\BambuStudio\BambuNetworkEngine.conf
+        /// Example: C:\Users\yourname\AppData\Roaming\BambuStudio
         /// </summary>
         public string BambuNetworkPluginConfigFolder { get; private set; } = Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\BambuStudio");
 
