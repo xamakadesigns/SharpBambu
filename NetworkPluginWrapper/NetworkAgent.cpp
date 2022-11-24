@@ -79,7 +79,7 @@ __declspec(dllexport) int bambu_network_destroy_agent()
 __declspec(dllexport) int initialize_network_module()
 {
     //std::string data_dir_str = dll_dir();
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" using data dir %1%") % data_dir();
+    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" using data dir %1%") % data_dir();
     boost::filesystem::path data_dir_path(data_dir());
     //auto plugin_folder = data_dir_path / "plugins";
 
@@ -401,13 +401,9 @@ __declspec(dllexport) int init_log()
 
 __declspec(dllexport) int set_config_dir(char* config_dir)
 {
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" data_dir %1% dll_dir=%2%") % data_dir() % dll_dir();
-
     int ret = 0;
     if (network_agent && set_config_dir_ptr) {
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" agent %1% setting config dir=%2%") % network_agent % config_dir;
         ret = set_config_dir_ptr(network_agent, config_dir);
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" OK");
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%, config_dir=%3%")%network_agent %ret %config_dir ;
     }
