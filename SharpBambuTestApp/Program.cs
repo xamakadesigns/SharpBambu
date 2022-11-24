@@ -34,13 +34,14 @@ networkPlugin.ConnectServer();
 
 try
 {
-    Console.WriteLine($"User ID: {networkPlugin.UserId}");
-    Console.WriteLine($"User Name: {networkPlugin.UserName}");
-    Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
+    Console.Clear();
+    //Console.WriteLine($"User ID: {networkPlugin.UserId}");
+    //Console.WriteLine($"User Name: {networkPlugin.UserName}");
+    //Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
     Console.WriteLine($"User Avatar: {networkPlugin.UserAvatar}");
     Console.WriteLine($"User Logged in: {networkPlugin.IsUserLoggedIn}");
     Console.WriteLine($"Server Connected: {networkPlugin.IsServerConnected}");
-    Console.WriteLine($"Selected Machine: {networkPlugin.CurrentMachineDeviceId}");
+    //Console.WriteLine($"Selected Machine: {networkPlugin.CurrentMachineDeviceId}");
 
     while(!networkPlugin.IsServerConnected)
     {
@@ -60,7 +61,16 @@ try
         if (string.IsNullOrEmpty(gcode))
             break;
 
-        networkPlugin.SendGcode(gcode + "\n");
+        switch (gcode)
+        {
+            case "wipe":
+                Console.WriteLine("Sending wipe nozzle sequence as copied from Bambu Studio source.. do this at your own risk!");
+                networkPlugin.WipeNozzle();
+                break;
+            default:
+                networkPlugin.SendGcode(gcode + "\n");
+                break;
+        }
     }
 }
 catch (Exception ex)
