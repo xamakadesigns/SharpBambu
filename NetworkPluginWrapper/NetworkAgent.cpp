@@ -383,7 +383,7 @@ __declspec(dllexport) BSTR get_version()
         BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(", get_version not supported,return 00.00.00.00!");
         ret = "00.00.00.00";
     }
-    ret = get_version_ptr();
+    
     _bstr_t bstr = ret.c_str();
     return bstr.Detach();
 }
@@ -691,14 +691,10 @@ __declspec(dllexport) BSTR get_user_id()
 {
     std::string ret;
     if (network_agent && get_user_id_ptr) {
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", start");
         ret = get_user_id_ptr(network_agent);
-        //get_user_id_ptr(network_agent);
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", result %1%") %ret;
     }
 
     _bstr_t bstr = ret.c_str();
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", allocated result %1%") % bstr;
     return ::SysAllocString (bstr);
 }
 
@@ -733,9 +729,7 @@ __declspec(dllexport) BSTR build_login_cmd()
 {
     std::string ret = "";
     if (network_agent && build_login_cmd_ptr) {
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", start");
         ret = build_login_cmd_ptr(network_agent);
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", result %1%") % ret;
     }
 
     _bstr_t bstr = ret.c_str();
