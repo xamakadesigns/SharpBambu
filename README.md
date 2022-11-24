@@ -7,7 +7,7 @@ This project is in **no way related or supported by Bambu Lab**. It is being dev
 - Only Windows OS is being targetted for support at this time.
 
 ## About bambu_networking.dll (Bambu Lab Network Plugin)
-bambu_networking.dll is a closed source project maintained by Bambu Lab. It is a "plugin" for Bambu Studio (an open source project based on slic3r). Therefore most of the communication with the printer is relayed via the cloud using this plugin dll, and the implementation details are not disclosed. The expectation is that Bambu Slicer (or another application) will access the cloud services using the network plugin dll.
+bambu_networking.dll is a closed source project maintained by Bambu Lab. It is a "plugin" for [Bambu Studio](https://github.com/bambulab/BambuStudio) (an open source project based on slic3r). Therefore most of the communication with the printer is relayed via the cloud using this plugin dll, and the implementation details are not disclosed. The expectation is that Bambu Slicer (or another application) will access the cloud services using the network plugin dll.
 
 # Getting started
 
@@ -49,6 +49,7 @@ Startup:
 - ⬜ Able to connect locally with the printer
 - ⬜ Able to retrieve printer status such as progress or temperatures
 - ✅ Able to issue gcode commands
+- ✅ Able to wipe nozzle while printing (just a macro copied from Bambu Studio start gcode - please make your own, better one)
 - ⬜ Able to get the camera feed url and/or establish a tunnel
 - ⬜ Able to upload gcode to the printer and begin a print
 - ⬜ Able to issue commands to the wrapper via PowerShell (such as start a print job or load/unload the AMS)
@@ -58,3 +59,12 @@ Startup:
 # Contact
 - Want to help? I would appreciate a hand with sorting out implementation details.
 - xamaka@cnrdesigns.com 
+
+# Demo
+* Issuing a few nozzle wipes while the print is running 
+
+Note - this is copied from Bambu Studio startup gcode. Do this at your own risk. Please make a proper gcode!
+
+
+https://user-images.githubusercontent.com/12724275/203712806-e3dbeacb-d423-43e6-b30e-385d2020bbfe.mp4
+
