@@ -18,8 +18,8 @@ networkPlugin.SetCertFile("C:\\Program Files\\Bambu Studio\\resources\\cert", "s
 
 if (networkPlugin.InitializeNetworkAgentLog() == 0)
 {
-    Console.WriteLine($"Bambu Network Plugin log initialized; should be found at location: {networkPlugin.BambuNetworkPluginLogFolder}");
-    Console.WriteLine($"Bambu Network Plugin BambuNetworkEngine.conf file should be located at: {networkPlugin.BambuNetworkPluginConfigFolder}");
+    //Console.WriteLine($"Bambu Network Plugin log initialized; should be found at location: {networkPlugin.BambuNetworkPluginLogFolder}");
+    //Console.WriteLine($"Bambu Network Plugin BambuNetworkEngine.conf file should be located at: {networkPlugin.BambuNetworkPluginConfigFolder}");
 }
 else
 {
