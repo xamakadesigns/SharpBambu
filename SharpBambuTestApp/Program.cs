@@ -10,10 +10,10 @@ Console.WriteLine("Initialize Bambu Network Plugin");
 
 networkPlugin.InitializeNetworkPlugin();
 
-Console.WriteLine($"Version {networkPlugin.GetNetworkPluginVersion()}");
+Console.WriteLine($"Version {networkPlugin.NetworkPluginVersion}");
 
 networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
-// m_agent->set_cert_file(resources_dir() + "/cert", "slicer_base64.cer");
+networkPlugin.SetCertFile("C:\\Program Files\\Bambu Studio\\resources\\cert", "slicer_base64.cer"); // todo fix path
 
 
 if (networkPlugin.InitializeNetworkAgentLog() == 0)
@@ -27,21 +27,41 @@ else
 }
 
 // init_networking_callbacks
-//m_agent->set_country_code(country_code);
+networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
+networkPlugin.ConnectServer();
 
 try
 {
-    Console.WriteLine($"User ID: {networkPlugin.GetUserId()}");
-    Console.WriteLine($"User Name: {networkPlugin.GetUserName()}");
-    Console.WriteLine($"User Nickname: {networkPlugin.GetUserNickname()}");
-    Console.WriteLine($"User Avatar: {networkPlugin.GetUserAvatar()}");
-    Console.WriteLine($"Build Login CMD: {networkPlugin.BuildLoginCmd()}");
+    Console.WriteLine($"User ID: {networkPlugin.UserId}");
+    Console.WriteLine($"User Name: {networkPlugin.UserName}");
+    Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
+    Console.WriteLine($"User Avatar: {networkPlugin.UserAvatar}");
+    Console.WriteLine($"User Logged in: {networkPlugin.IsUserLoggedIn}");
+    Console.WriteLine($"Server Connected: {networkPlugin.IsServerConnected}");
+    Console.WriteLine($"Selected Machine: {networkPlugin.CurrentMachineDeviceId}");
 
-    //networkPlugin.ConnectServer();
+    while(!networkPlugin.IsServerConnected)
+    {
+        Thread.Sleep(1000);
+        Console.WriteLine("Waiting for cloud connection ...");
+    }
 
-    //networkPlugin.DisconnectPrinter();
+    Console.WriteLine("Setting up MQTT connection ...");
+
+    networkPlugin.RefreshConnection();
+
+    while (true)
+    {
+        Console.Write("> ");
+        var gcode = Console.ReadLine();
+
+        if (string.IsNullOrEmpty(gcode))
+            break;
+
+        networkPlugin.SendGcode(gcode + "\n");
+    }
 }
 catch (Exception ex)
 {

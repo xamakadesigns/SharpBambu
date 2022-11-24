@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -53,6 +55,24 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern UIntPtr bambu_network_create_agent();
 
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int set_cert_file([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder folder, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder filename); 
+        
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int set_country_code([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder countryCode);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int send_message_to_printer([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder jsonMessage, int qos);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int send_message([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder jsonMessage, int qos);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern bool is_user_login();
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern bool is_server_connected();
+
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int bambu_network_destroy_agent();
@@ -81,10 +101,11 @@ namespace Test
         private static extern int disconnect_printer();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int start();
+        [return: MarshalAs(UnmanagedType.BStr)]
+        private static extern string get_user_selected_machine(); 
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern bool is_server_connected();
+        private static extern int start();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
@@ -113,6 +134,9 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
         private static extern string get_user_avatar();
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int refresh_connection();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
@@ -338,7 +362,9 @@ namespace Test
 
         private void OnConnectedEvent()
         {
-            throw new NotImplementedException();
+            Debug.Print("Server connected");
+            Console.WriteLine("Server connected");
+            //throw new NotImplementedException();
         }
 
         private void OnMessageEvent(string deviceId, string message)
@@ -429,12 +455,7 @@ namespace Test
         /// Should return the current Bambu Network Plugin dll version
         /// </summary>
         /// <returns>Version number or 00.00.00.00 if unable to resolve.</returns>
-        public string GetNetworkPluginVersion()
-        {
-            Debug.Print("Getting Bambu Network Plugin version");
-
-            return get_version();
-        }
+        public string NetworkPluginVersion => get_version();
 
         /// <summary>
         /// Creates a new subfolder 'log' and records activity happening in the Bambu Network Plugin dll
@@ -487,32 +508,13 @@ namespace Test
                 throw new Exception($"Unable to log out; result code {result}");
         }
 
-        public string GetUserName()
-        {
-            Debug.Print("Get user name");
+        public string UserName => get_user_name();
+        
+        public string UserAvatar => get_user_avatar();
+        
+        public string UserNickname => get_user_nickanme();
 
-            return get_user_name();
-        }
-        public string GetUserAvatar()
-        {
-            Debug.Print("Get user avatar");
-
-            return get_user_avatar();
-        }
-
-        public string GetUserNickname()
-        {
-            Debug.Print("Get user nickname");
-
-            return get_user_nickanme();
-        }
-
-        public string GetUserId()
-        {
-            Debug.Print("Get user id");
-
-            return get_user_id();
-        }
+        public string UserId => get_user_id();
 
         public string BuildLoginCmd()
         {
@@ -554,6 +556,102 @@ namespace Test
         public void Start()
         {
             start();
+        }
+
+        public void SetCertFile(string certFolder, string certFilename)
+        {
+            Debug.Print($"Set cert file {certFolder}\\{certFilename}");
+
+            var result = set_cert_file(new StringBuilder(certFolder), new StringBuilder(certFilename));
+
+            if (result != 0)
+                throw new Exception($"Unable to set cert file, result: {result}");
+        }
+
+        public void SetCountryCode(string countryCode)
+        {
+            Debug.Print($"Set country code {countryCode}");
+
+            int result = set_country_code(new StringBuilder(countryCode));
+
+            if (result != 0)
+                throw new Exception($"Unable to set country code, result: {result}");
+        }
+
+        public bool IsUserLoggedIn => is_user_login();
+
+        public bool IsServerConnected => is_server_connected();
+
+        public string CurrentMachineDeviceId => get_user_selected_machine();
+
+        public bool LanMode { get; private set; } = false;
+        public int GcodeSequenceNumber { get; private set; } = 20000;
+
+        public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
+        {
+            if (string.IsNullOrEmpty(CurrentMachineDeviceId))
+                throw new Exception("DeviceId is not set; first, please login and bind the printer with Bambu Studio");
+
+            if (string.IsNullOrEmpty(UserId))
+                throw new Exception("UserId is not set; first, please login and bind the printer with Bambu Studio");
+            
+            var json = JsonConvert.SerializeObject(jsonMessageObject, Formatting.None,
+                new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
+            if (LanMode)
+            {
+                Debug.Print($"Sending message (via lan) to printer with device id {CurrentMachineDeviceId} and qos {qos}");
+
+                var result = send_message_to_printer(new StringBuilder(CurrentMachineDeviceId), new StringBuilder(json), qos);
+
+                if (result != 0)
+                    throw new Exception($"Unable to send message to printer via lan, result: {result}");
+            }
+            else
+            {
+                Debug.Print($"Sending message (via cloud) to printer with device id {CurrentMachineDeviceId} and qos {qos}");
+
+                var result = send_message(new StringBuilder(CurrentMachineDeviceId), new StringBuilder(json), qos);
+
+                if (result != 0)
+                    throw new Exception($"Unable to send message to printer via cloud, result: {result}");
+            }
+        }
+
+        public void SetFan()
+        {
+            //std::string gcode = (boost::format("M106 P%1% S%2% \n") % (int)fan_type % (on_off ? 255 : 0)).str();
+        }
+
+        public void SendGcode(string gcode)
+        {
+            var payload = new
+            {
+                print = new
+                {
+                    command = "gcode_line",
+                    param = gcode,
+                    sequence_id = (GcodeSequenceNumber++).ToString(),
+                    user_id = UserId
+                }
+            };
+
+            JObject messageObject = JObject.FromObject(payload);
+
+            SendMessageToPrinter(messageObject);
+        }
+
+        public void RefreshConnection()
+        {
+            Debug.Print("RefreshConnection (connect to mqtt)");
+
+            var result = refresh_connection();
+
+            if (result != 0)
+                throw new Exception("Unable to connect to mqtt; first, please login and bind the printer with Bambu Studio");
         }
     }
 }
