@@ -653,5 +653,24 @@ namespace Test
             if (result != 0)
                 throw new Exception("Unable to connect to mqtt; first, please login and bind the printer with Bambu Studio");
         }
+
+        public void WipeNozzle()
+        {
+            // test - do at your own risk
+            // (below code intentionally not indented)
+            SendGcode(@"
+G92 E0
+G1 E-0.5 F300
+G1 X70 Y265 F9000
+G1 X76 F15000
+G1 X65 F15000
+G1 X76 F15000
+G1 X65 F15000; shake to put down garbage
+G1 X80 F6000
+G1 X95 F15000
+G1 X80 F15000
+G1 X165 F15000; wipe and shake
+");
+        }
     }
 }
