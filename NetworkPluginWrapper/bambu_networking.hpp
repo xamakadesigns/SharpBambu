@@ -63,7 +63,21 @@ namespace BBL {
 
 // https://stackoverflow.com/questions/19044556/passing-managed-function-to-unmanaged-function-that-uses-stdfunction
 
+    // OnUserLoginFn
+    // OnPrinterConnectedFn
+    // OnLocalConnectedFn
 typedef void (*OnServerConnectedFnCS)(void);
+typedef void (*OnMessageFnCS)(BSTR dev_id, BSTR msg);
+// OnMessageFn
+// OnHttpErrorFn
+// GetCountryCodeFn
+// OnUpdateStatusFn
+// WasCancelledFn
+// OnMsgArrivedFn
+// ProgressFn
+// LoginFn
+// ResultFn
+// CancelFn
 
 // user callbacks
 typedef std::function<void(int online_login, bool login)> OnUserLoginFn;

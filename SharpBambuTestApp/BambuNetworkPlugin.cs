@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SharpBambuTestApp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,9 +15,17 @@ namespace Test
 {
     public class BambuNetworkPlugin : IDisposable
     {
+        private OnServerConnectedDelegate InstanceOnServerConnectedDelegate;
+        private OnPrinterMessageDelegate InstanceOnCloudMessageDelegate;
+        private OnPrinterMessageDelegate InstanceOnLocalMessageDelegate;
+
+        public Dictionary<string, BambuPrinter> Printers { get; } = new Dictionary<string, BambuPrinter>();
+
         public BambuNetworkPlugin()
         {
-            staticOnServerConnectedDelegate = OnServerConnectedEvent;
+            InstanceOnServerConnectedDelegate = OnServerConnectedEvent;
+            InstanceOnCloudMessageDelegate = OnCloudMessageEvent;
+            InstanceOnLocalMessageDelegate = OnLocalMessageEvent;
         }
 
         /// <summary>
@@ -173,7 +182,7 @@ namespace Test
         private delegate void OnHttpErrorDelegate(uint httpStatusCode, string httpBody);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnPrinterMessageDelegate(string deviceId, string message);
+        private delegate void OnPrinterMessageDelegate([MarshalAs(UnmanagedType.BStr)] string deviceId, [MarshalAs(UnmanagedType.BStr)] string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnMessageArrivedDelegate(string deviceInfoJson);
@@ -390,17 +399,15 @@ namespace Test
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_http_error_fn, result: {result}");
 
-            result = set_on_local_message_fn(new OnPrinterMessageDelegate(OnLocalMessageEvent));
+            result = set_on_local_message_fn(InstanceOnLocalMessageDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_local_message_fn, result: {result}");
 
-            result = set_on_message_fn(new OnPrinterMessageDelegate(OnMessageEvent));
+            result = set_on_message_fn(InstanceOnCloudMessageDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_message_fn, result: {result}");
 
-            var ptr = Marshal.GetFunctionPointerForDelegate(staticOnServerConnectedDelegate);
-
-            result = set_on_server_connected_fn(staticOnServerConnectedDelegate);
+            result = set_on_server_connected_fn(InstanceOnServerConnectedDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_server_connected_fn, result: {result}");
 
@@ -444,18 +451,30 @@ namespace Test
             SelectedMachineDeviceId = SelectedMachineDeviceId;
         }
 
-        private void OnMessageEvent(string deviceId, string message)
+        private void OnCloudMessageEvent(string deviceId, string jsonMessage)
         {
-            Console.WriteLine("OnMessageEvent");
-            throw new NotImplementedException();
+            var message = JsonConvert.DeserializeObject<MessageDto>(jsonMessage);
+            var printerMessage = message?.PrinterMessage;
+
+            if (!Printers.ContainsKey(deviceId))
+                Printers.Add(deviceId, new BambuPrinter(deviceId));
+            
+            var printer = Printers[deviceId];
+            printer.ProcessMessage(printerMessage);
         }
 
-        private void OnLocalMessageEvent(string deviceId, string message)
+        private void OnLocalMessageEvent(string deviceId, string jsonMessage)
         {
-            Console.WriteLine("OnLocalMessageEvent");
-            throw new NotImplementedException();
-        }
+            var message = JsonConvert.DeserializeObject<MessageDto>(jsonMessage);
+            var printerMessage = message?.PrinterMessage;
 
+            if (!Printers.ContainsKey(deviceId))
+                Printers.Add(deviceId, new BambuPrinter(deviceId));
+
+            var printer = Printers[deviceId];
+            printer.ProcessMessage(printerMessage);
+        }
+        
         private void OnHttpErrorEvent(uint httpStatusCode, string httpBody)
         {
             Console.WriteLine("OnHttpErrorEvent");
@@ -679,8 +698,6 @@ namespace Test
 
         public bool LanMode { get; private set; } = false;
         public int GcodeSequenceNumber { get; private set; } = 20000;
-        private OnServerConnectedDelegate staticOnServerConnectedDelegate;
-
         public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
         {
             if (string.IsNullOrEmpty(SelectedMachineDeviceId))

@@ -102,9 +102,9 @@ namespace Slic3r {
         __declspec(dllexport) int set_on_server_connected_fn(OnServerConnectedFnCS fn);
         __declspec(dllexport) int set_on_http_error_fn(OnHttpErrorFn fn);
         __declspec(dllexport) int set_get_country_code_fn(GetCountryCodeFn fn);
-        __declspec(dllexport) int set_on_message_fn(OnMessageFn fn);
+        __declspec(dllexport) int set_on_message_fn(OnMessageFnCS fn);
         __declspec(dllexport) int set_on_local_connect_fn(OnLocalConnectedFn fn);
-        __declspec(dllexport) int set_on_local_message_fn(OnMessageFn fn);
+        __declspec(dllexport) int set_on_local_message_fn(OnMessageFnCS fn);
         __declspec(dllexport) int connect_server();
         __declspec(dllexport) bool is_server_connected();
         __declspec(dllexport) int refresh_connection();

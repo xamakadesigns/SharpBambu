@@ -477,16 +477,17 @@ __declspec(dllexport) int set_on_printer_connected_fn(OnPrinterConnectedFn fn)
     return ret;
 }
 
-OnServerConnectedFnCS OnServerConnectedFnCs = nullptr;
+OnServerConnectedFnCS OnServerConnectedFnCS_ptr = nullptr;
 
 void OnServerConnectedFnWrapper()
 {
-    OnServerConnectedFnCs();
+    if (OnServerConnectedFnCS_ptr != nullptr)
+        OnServerConnectedFnCS_ptr();
 }
 
 __declspec(dllexport) int set_on_server_connected_fn(OnServerConnectedFnCS fn)
 {
-    OnServerConnectedFnCs = fn;
+    OnServerConnectedFnCS_ptr = fn;
     int ret = 0;
     if (network_agent && set_on_server_connected_fn_ptr) {
         ret = set_on_server_connected_fn_ptr(network_agent, OnServerConnectedFnWrapper);
@@ -518,11 +519,24 @@ __declspec(dllexport) int set_get_country_code_fn(GetCountryCodeFn fn)
     return ret;
 }
 
-__declspec(dllexport) int set_on_message_fn(OnMessageFn fn)
+OnMessageFnCS OnMessageFnCS_ptr = nullptr;
+
+void OnMessageFnWrapper(std::string dev_id, std::string msg)
 {
+    BSTR dev_id_bstr = ::_com_util::ConvertStringToBSTR(dev_id.c_str());
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnMessageFnCS_ptr != nullptr)
+        OnMessageFnCS_ptr(dev_id_bstr, msg_bstr);
+}
+
+__declspec(dllexport) int set_on_message_fn(OnMessageFnCS fn)
+{
+    OnMessageFnCS_ptr = fn;
+
     int ret = 0;
     if (network_agent && set_on_message_fn_ptr) {
-        ret = set_on_message_fn_ptr(network_agent, fn);
+        ret = set_on_message_fn_ptr(network_agent, OnMessageFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }
@@ -540,11 +554,25 @@ __declspec(dllexport) int set_on_local_connect_fn(OnLocalConnectedFn fn)
     return ret;
 }
 
-__declspec(dllexport) int set_on_local_message_fn(OnMessageFn fn)
+OnMessageFnCS OnLocalMessageFnCS_ptr = nullptr;
+
+void OnLocalMessageFnWrapper(std::string dev_id, std::string msg)
 {
+    BSTR dev_id_bstr = ::_com_util::ConvertStringToBSTR(dev_id.c_str());
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnLocalMessageFnCS_ptr != nullptr)
+        OnLocalMessageFnCS_ptr(dev_id_bstr, msg_bstr);
+}
+
+
+__declspec(dllexport) int set_on_local_message_fn(OnMessageFnCS fn)
+{
+    OnLocalMessageFnCS_ptr = fn;
+
     int ret = 0;
     if (network_agent && set_on_local_message_fn_ptr) {
-        ret = set_on_local_message_fn_ptr(network_agent, fn);
+        ret = set_on_local_message_fn_ptr(network_agent, OnLocalMessageFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }
