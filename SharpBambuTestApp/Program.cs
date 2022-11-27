@@ -19,6 +19,7 @@ networkPlugin.InitCallbacks();
 networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
+networkPlugin.Subscribe();
 networkPlugin.ConnectServer();
 
 try
@@ -37,9 +38,6 @@ try
         Thread.Sleep(1000);
         Console.WriteLine("Waiting for cloud connection ...");
     }
-
-    networkPlugin.Subscribe();
-    Console.WriteLine($"Server Connected: {networkPlugin.IsServerConnected}");
 
     Console.WriteLine("Setting up MQTT connection ...");
 

@@ -61,6 +61,10 @@ namespace BBL {
 #define IOT_JSON_KEY_USER_ID            "user_id"
 
 
+// https://stackoverflow.com/questions/19044556/passing-managed-function-to-unmanaged-function-that-uses-stdfunction
+
+typedef void (*OnServerConnectedFnCS)(void);
+
 // user callbacks
 typedef std::function<void(int online_login, bool login)> OnUserLoginFn;
 // printer callbacks

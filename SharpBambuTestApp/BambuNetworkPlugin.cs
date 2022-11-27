@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +14,11 @@ namespace Test
 {
     public class BambuNetworkPlugin : IDisposable
     {
+        public BambuNetworkPlugin()
+        {
+            staticOnServerConnectedDelegate = OnServerConnectedEvent;
+        }
+
         /// <summary>
         /// Example: C:\Users\yourname\AppData\Roaming\BambuStudio
         /// </summary>
@@ -371,39 +378,41 @@ namespace Test
 
             Debug.Print("Setting up callbacks");
 
-            result = set_on_user_login_fn(OnUserLoginEvent);
+            result = set_on_user_login_fn(new OnUserLoginDelegate(OnUserLoginEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_user_login_fn, result: {result}");
 
-            result = set_on_local_connect_fn(OnLocalConnectEvent);
+            result = set_on_local_connect_fn(new OnLocalConnectedDelegate(OnLocalConnectEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_local_connect_fn, result: {result}");
 
-            result = set_on_http_error_fn(OnHttpErrorEvent);
+            result = set_on_http_error_fn(new OnHttpErrorDelegate(OnHttpErrorEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_http_error_fn, result: {result}");
 
-            result = set_on_local_message_fn(OnLocalMessageEvent);
+            result = set_on_local_message_fn(new OnPrinterMessageDelegate(OnLocalMessageEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_local_message_fn, result: {result}");
 
-            result = set_on_message_fn(OnMessageEvent);
+            result = set_on_message_fn(new OnPrinterMessageDelegate(OnMessageEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_message_fn, result: {result}");
 
-            result = set_on_server_connected_fn(OnServerConnectedEvent);
+            var ptr = Marshal.GetFunctionPointerForDelegate(staticOnServerConnectedDelegate);
+
+            result = set_on_server_connected_fn(staticOnServerConnectedDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_server_connected_fn, result: {result}");
 
-            result = set_get_country_code_fn(OnGetCountryCodeEvent);
+            result = set_get_country_code_fn(new OnGetCountryCodeDelegate(OnGetCountryCodeEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_get_country_code_fn, result: {result}");
 
-            result = set_on_printer_connected_fn(OnPrinterConnectedEvent);
+            result = set_on_printer_connected_fn(new OnPrinterConnectedDelegate(OnPrinterConnectedEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_printer_connected_fn, result: {result}");
 
-            result = set_on_ssdp_msg_fn(OnSsdpMessageEvent);
+            result = set_on_ssdp_msg_fn(new OnSSDPMessageDelegate(OnSsdpMessageEvent));
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_ssdp_msg_fn, result: {result}");
 
@@ -411,51 +420,57 @@ namespace Test
 
         private void OnSsdpMessageEvent(string topic)
         {
+            Console.WriteLine("OnSsdpMessageEvent");
             throw new NotImplementedException();
         }
 
         private void OnPrinterConnectedEvent(string topic)
         {
+            Console.WriteLine("OnPrinterConnectedEvent");
             throw new NotImplementedException();
         }
 
         private string OnGetCountryCodeEvent()
         {
+            Console.WriteLine("OnGetCountryCodeEvent");
             throw new NotImplementedException();
         }
 
         private void OnServerConnectedEvent()
         {
             Debug.Print("Server connected");
-            Console.WriteLine("Server connected");
 
             // Copying what Bambu Slicer does .. not sure why this is needed
             SelectedMachineDeviceId = SelectedMachineDeviceId;
-            throw new NotImplementedException();
         }
 
         private void OnMessageEvent(string deviceId, string message)
         {
+            Console.WriteLine("OnMessageEvent");
             throw new NotImplementedException();
         }
 
         private void OnLocalMessageEvent(string deviceId, string message)
         {
+            Console.WriteLine("OnLocalMessageEvent");
             throw new NotImplementedException();
         }
 
         private void OnHttpErrorEvent(uint httpStatusCode, string httpBody)
         {
+            Console.WriteLine("OnHttpErrorEvent");
             throw new NotImplementedException();
         }
 
         private void OnLocalConnectEvent(int status, string deviceId, string message)
         {
+            Console.WriteLine("OnLocalConnectEvent");
             throw new NotImplementedException();
         }
 
         private void OnUserLoginEvent(int onlineLogin, bool login)
         {
+            Console.WriteLine("OnUserLoginEvent");
             throw new NotImplementedException();
         }
 
@@ -664,6 +679,7 @@ namespace Test
 
         public bool LanMode { get; private set; } = false;
         public int GcodeSequenceNumber { get; private set; } = 20000;
+        private OnServerConnectedDelegate staticOnServerConnectedDelegate;
 
         public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
         {
