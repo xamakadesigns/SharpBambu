@@ -477,11 +477,19 @@ __declspec(dllexport) int set_on_printer_connected_fn(OnPrinterConnectedFn fn)
     return ret;
 }
 
-__declspec(dllexport) int set_on_server_connected_fn(OnServerConnectedFn fn)
+OnServerConnectedFnCS OnServerConnectedFnCs = nullptr;
+
+void OnServerConnectedFnWrapper()
 {
+    OnServerConnectedFnCs();
+}
+
+__declspec(dllexport) int set_on_server_connected_fn(OnServerConnectedFnCS fn)
+{
+    OnServerConnectedFnCs = fn;
     int ret = 0;
     if (network_agent && set_on_server_connected_fn_ptr) {
-        ret = set_on_server_connected_fn_ptr(network_agent, fn);
+        ret = set_on_server_connected_fn_ptr(network_agent, OnServerConnectedFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }
