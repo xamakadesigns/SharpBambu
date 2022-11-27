@@ -456,6 +456,7 @@ __declspec(dllexport) int set_on_ssdp_msg_fn(OnMsgArrivedFn fn)
 
 __declspec(dllexport) int set_on_user_login_fn(OnUserLoginFn fn)
 {
+    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" info: set_on_user_login_fn=%1%") % (& fn);
     int ret = 0;
     if (network_agent && set_on_user_login_fn_ptr) {
         ret = set_on_user_login_fn_ptr(network_agent, fn);
