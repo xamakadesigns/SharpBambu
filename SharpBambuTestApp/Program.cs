@@ -14,19 +14,8 @@ Console.WriteLine($"Version {networkPlugin.NetworkPluginVersion}");
 
 networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
 networkPlugin.SetCertFile("C:\\Program Files\\Bambu Studio\\resources\\cert", "slicer_base64.cer"); // todo fix path
-
-
-if (networkPlugin.InitializeNetworkAgentLog() == 0)
-{
-    //Console.WriteLine($"Bambu Network Plugin log initialized; should be found at location: {networkPlugin.BambuNetworkPluginLogFolder}");
-    //Console.WriteLine($"Bambu Network Plugin BambuNetworkEngine.conf file should be located at: {networkPlugin.BambuNetworkPluginConfigFolder}");
-}
-else
-{
-    throw new Exception($"Unable to initialize the Bambu Network Plugin log file; Check permissions for {networkPlugin.BambuNetworkPluginLogFolder}");
-}
-
-// init_networking_callbacks
+networkPlugin.InitializeNetworkAgentLog();
+networkPlugin.InitCallbacks();
 networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
@@ -34,7 +23,7 @@ networkPlugin.ConnectServer();
 
 try
 {
-    Console.Clear();
+    //Console.Clear();
     //Console.WriteLine($"User ID: {networkPlugin.UserId}");
     //Console.WriteLine($"User Name: {networkPlugin.UserName}");
     //Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
@@ -48,6 +37,9 @@ try
         Thread.Sleep(1000);
         Console.WriteLine("Waiting for cloud connection ...");
     }
+
+    networkPlugin.Subscribe();
+    Console.WriteLine($"Server Connected: {networkPlugin.IsServerConnected}");
 
     Console.WriteLine("Setting up MQTT connection ...");
 

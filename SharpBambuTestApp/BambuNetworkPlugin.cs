@@ -73,14 +73,17 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern bool is_server_connected();
 
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int start_subscribe([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder module);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int stop_subscribe([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder module);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int bambu_network_destroy_agent();
 
-
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int init_log();
-
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_config_dir([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder path);
@@ -102,7 +105,10 @@ namespace Test
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.BStr)]
-        private static extern string get_user_selected_machine(); 
+        private static extern string get_user_selected_machine();
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int set_user_selected_machine([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int start();
@@ -141,57 +147,84 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
 
-        
+
 
         // events
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnSSDPMessageDelegate(string topic);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUserLoginDelegate(int onlineLogin, bool login);
+        
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnPrinterConnectedDelegate(string topic);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnServerConnectedDelegate();
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnHttpErrorDelegate(uint httpStatusCode, string httpBody);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnPrinterMessageDelegate(string deviceId, string message);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnMessageArrivedDelegate(string deviceInfoJson);
-        private delegate void OnSSDPMessageDelegate(int onlineLogin, bool login);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate string OnGetCountryCodeDelegate();
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnLocalConnectedDelegate(int status, string deviceId, string message);
-        private delegate void OnLocalMessageDelegate(int onlineLogin, bool login);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnUserLogin(int onlineLogin, bool login);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUpdateStatusDelegate(int status, int code, string message);
-        private delegate bool OnWasCanceledDelegate();
-        private delegate bool OnCancelDelegate();
-        private delegate void OnProgressUpdatedDelegate(int progress);
-        private delegate void OnLoginDelegate(int retcode, string info);
-        private delegate void OnResultDelegate(int retcode, string info);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate bool OnWasCanceledDelegate(); // todo
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate bool OnCancelDelegate(); // todo
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnProgressUpdatedDelegate(int progress); // todo
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnLoginDelegate(int retcode, string info); // todo
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnResultDelegate(int retcode, string info); // todo
 
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_user_login_fn(OnUserLoginDelegate callbackFunction);
-
-
-        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_ssdp_msg_fn(OnSSDPMessageDelegate callbackFunction);
-
+        private static extern int set_on_ssdp_msg_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnSSDPMessageDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_printer_connected_fn(OnPrinterConnectedDelegate callbackFunction);
+        private static extern int set_on_user_login_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnUserLoginDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_server_connected_fn(OnServerConnectedDelegate callbackFunction);
+        private static extern int set_on_printer_connected_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnPrinterConnectedDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_http_error_fn(OnHttpErrorDelegate callbackFunction);
+        private static extern int set_on_server_connected_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnServerConnectedDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_get_country_code_fn(OnGetCountryCodeDelegate callbackFunction);
+        private static extern int set_on_http_error_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnHttpErrorDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_message_fn(OnPrinterMessageDelegate callbackFunction);
+        private static extern int set_get_country_code_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnGetCountryCodeDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_local_connect_fn(OnLocalConnectedDelegate callbackFunction);
+        private static extern int set_on_message_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnPrinterMessageDelegate callbackFunction);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int set_on_local_message_fn(OnLocalMessageDelegate callbackFunction);
+        private static extern int set_on_local_connect_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnLocalConnectedDelegate callbackFunction);
 
-
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int set_on_local_message_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnPrinterMessageDelegate callbackFunction);
 
         // enums
         public enum SendingPrintJobStage
@@ -330,22 +363,53 @@ namespace Test
 
             if (Agent == UIntPtr.Zero)
                 throw new Exception("Bambu Network Plugin failed to initialize");
-
-            Debug.Print("Setting delegates");
-            set_on_user_login_fn(OnUserLoginEvent);
-            set_on_local_connect_fn(OnLocalConnectEvent);
-            set_on_http_error_fn(OnHttpErrorEvent);
-            set_on_local_message_fn(OnLocalMessageEvent);
-            set_on_message_fn(OnMessageEvent);
-            set_on_server_connected_fn(OnConnectedEvent);
-            set_get_country_code_fn(OnGetCountryCodeEvent);
-            set_on_printer_connected_fn(OnPrinterConnectedEvent);
-            set_on_ssdp_msg_fn(OnSsdpMessageEvent);
-
-            Debug.Print("Starting network agent");
         }
 
-        private void OnSsdpMessageEvent(int onlineLogin, bool login)
+        public void InitCallbacks()
+        {
+            var result = 0;
+
+            Debug.Print("Setting up callbacks");
+
+            result = set_on_user_login_fn(OnUserLoginEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_user_login_fn, result: {result}");
+
+            result = set_on_local_connect_fn(OnLocalConnectEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_local_connect_fn, result: {result}");
+
+            result = set_on_http_error_fn(OnHttpErrorEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_http_error_fn, result: {result}");
+
+            result = set_on_local_message_fn(OnLocalMessageEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_local_message_fn, result: {result}");
+
+            result = set_on_message_fn(OnMessageEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_message_fn, result: {result}");
+
+            result = set_on_server_connected_fn(OnServerConnectedEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_server_connected_fn, result: {result}");
+
+            result = set_get_country_code_fn(OnGetCountryCodeEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_get_country_code_fn, result: {result}");
+
+            result = set_on_printer_connected_fn(OnPrinterConnectedEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_printer_connected_fn, result: {result}");
+
+            result = set_on_ssdp_msg_fn(OnSsdpMessageEvent);
+            if (result != 0)
+                throw new Exception($"Unable to initialize callback: set_on_ssdp_msg_fn, result: {result}");
+
+        }
+
+        private void OnSsdpMessageEvent(string topic)
         {
             throw new NotImplementedException();
         }
@@ -360,11 +424,14 @@ namespace Test
             throw new NotImplementedException();
         }
 
-        private void OnConnectedEvent()
+        private void OnServerConnectedEvent()
         {
             Debug.Print("Server connected");
             Console.WriteLine("Server connected");
-            //throw new NotImplementedException();
+
+            // Copying what Bambu Slicer does .. not sure why this is needed
+            SelectedMachineDeviceId = SelectedMachineDeviceId;
+            throw new NotImplementedException();
         }
 
         private void OnMessageEvent(string deviceId, string message)
@@ -372,7 +439,7 @@ namespace Test
             throw new NotImplementedException();
         }
 
-        private void OnLocalMessageEvent(int onlineLogin, bool login)
+        private void OnLocalMessageEvent(string deviceId, string message)
         {
             throw new NotImplementedException();
         }
@@ -460,12 +527,13 @@ namespace Test
         /// <summary>
         /// Creates a new subfolder 'log' and records activity happening in the Bambu Network Plugin dll
         /// </summary>
-        /// <returns></returns>
-        public int InitializeNetworkAgentLog()
+        public void InitializeNetworkAgentLog()
         {
             Debug.Print("Initializing Bambu Network Plugin log");
 
-            return init_log();
+            var result = init_log();
+            if (result != 0)
+                throw new Exception($"Unable to initialize the Bambu Network Plugin log file; Check permissions for {BambuNetworkPluginLogFolder}");
         }
 
         public void ConnectServer()
@@ -582,14 +650,24 @@ namespace Test
 
         public bool IsServerConnected => is_server_connected();
 
-        public string CurrentMachineDeviceId => get_user_selected_machine();
+        public string SelectedMachineDeviceId
+        {
+            get => get_user_selected_machine();
+            set
+            {
+                var result = set_user_selected_machine(new StringBuilder(value));
+
+                if (result != 0)
+                    throw new Exception($"Unable to set selected machine, result: {result}");
+            }
+        }
 
         public bool LanMode { get; private set; } = false;
         public int GcodeSequenceNumber { get; private set; } = 20000;
 
         public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
         {
-            if (string.IsNullOrEmpty(CurrentMachineDeviceId))
+            if (string.IsNullOrEmpty(SelectedMachineDeviceId))
                 throw new Exception("DeviceId is not set; first, please login and bind the printer with Bambu Studio");
 
             if (string.IsNullOrEmpty(UserId))
@@ -603,18 +681,18 @@ namespace Test
 
             if (LanMode)
             {
-                Debug.Print($"Sending message (via lan) to printer with device id {CurrentMachineDeviceId} and qos {qos}");
+                Debug.Print($"Sending message (via lan) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
 
-                var result = send_message_to_printer(new StringBuilder(CurrentMachineDeviceId), new StringBuilder(json), qos);
+                var result = send_message_to_printer(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
                 if (result != 0)
                     throw new Exception($"Unable to send message to printer via lan, result: {result}");
             }
             else
             {
-                Debug.Print($"Sending message (via cloud) to printer with device id {CurrentMachineDeviceId} and qos {qos}");
+                Debug.Print($"Sending message (via cloud) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
 
-                var result = send_message(new StringBuilder(CurrentMachineDeviceId), new StringBuilder(json), qos);
+                var result = send_message(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
                 if (result != 0)
                     throw new Exception($"Unable to send message to printer via cloud, result: {result}");
@@ -652,6 +730,25 @@ namespace Test
 
             if (result != 0)
                 throw new Exception("Unable to connect to mqtt; first, please login and bind the printer with Bambu Studio");
+        }
+
+        public void Subscribe(string module = "app")
+        {
+            Debug.Print($"Subscribe to module {module}");
+
+            var result = start_subscribe(new StringBuilder(module));
+
+            if (result != 0)
+                throw new Exception($"Unable to subscribe to module {module}");
+        }
+        public void Unsubscribe(string module = "app")
+        {
+            Debug.Print($"Unsubscribe from module {module}");
+
+            var result = stop_subscribe(new StringBuilder(module));
+
+            if (result != 0)
+                throw new Exception($"Unable to unsubscribe from module {module}");
         }
 
         public void WipeNozzle()
