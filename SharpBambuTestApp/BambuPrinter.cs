@@ -26,6 +26,7 @@ namespace SharpBambuTestApp
         public string DeviceId { get; }
 
         public List <BambuAms> AmsList { get; } = new List<BambuAms>();
+        public string CameraUrl { get; internal set; }
 
         internal void ProcessMessage(PrinterMessage message)
         {

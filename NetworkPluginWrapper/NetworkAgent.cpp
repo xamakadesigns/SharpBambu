@@ -926,7 +926,7 @@ __declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressF
     return ret;
 }
 
-__declspec(dllexport) int delete_setting(std::string setting_id)
+__declspec(dllexport) int delete_setting(char* setting_id)
 {
     int ret = 0;
     if (network_agent && delete_setting_ptr) {
@@ -1033,7 +1033,7 @@ __declspec(dllexport) int query_bind_status(std::vector<std::string> query_list,
     return ret;
 }
 
-__declspec(dllexport) int modify_printer_name(std::string dev_id, std::string dev_name)
+__declspec(dllexport) int modify_printer_name(char* dev_id, char* dev_name)
 {
     int ret = 0;
     if (network_agent && modify_printer_name_ptr) {
@@ -1043,11 +1043,26 @@ __declspec(dllexport) int modify_printer_name(std::string dev_id, std::string de
     return ret;
 }
 
-__declspec(dllexport) int get_camera_url(std::string dev_id, std::function<void(std::string)> callback)
+OnGetCameraUrlCS OnGetCameraUrlCS_ptr = nullptr;
+
+void GetCameraUrlCallbackWrapper(std::string url)
+{
+    BSTR url_bstr = ::_com_util::ConvertStringToBSTR(url.c_str());
+ 
+    if (OnGetCameraUrlCS_ptr != nullptr)
+        OnGetCameraUrlCS_ptr(url_bstr);
+}
+
+__declspec(dllexport) void set_get_camera_url_callback(OnGetCameraUrlCS callback)
+{
+    OnGetCameraUrlCS_ptr = callback;
+}
+
+__declspec(dllexport) int get_camera_url(char* dev_id)
 {
     int ret = 0;
     if (network_agent && get_camera_url_ptr) {
-        ret = get_camera_url_ptr(network_agent, dev_id, callback);
+        ret = get_camera_url_ptr(network_agent, dev_id, GetCameraUrlCallbackWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%, dev_id=%3%")%network_agent %ret %dev_id;
     }

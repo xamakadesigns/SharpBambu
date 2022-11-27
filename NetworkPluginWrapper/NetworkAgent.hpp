@@ -138,7 +138,7 @@ namespace Slic3r {
         __declspec(dllexport) BSTR request_setting_id(std::string name, std::map<std::string, std::string>* values_map, unsigned int* http_code);
         __declspec(dllexport) int put_setting(std::string setting_id, std::string name, std::map<std::string, std::string>* values_map, unsigned int* http_code);
         __declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressFn pro_fn = nullptr, WasCancelledFn cancel_fn = nullptr);
-        __declspec(dllexport) int delete_setting(std::string setting_id);
+        __declspec(dllexport) int delete_setting(char* setting_id);
         __declspec(dllexport) BSTR get_studio_info_url();
         __declspec(dllexport) int set_extra_http_header(std::map<std::string, std::string> extra_headers);
         __declspec(dllexport) int get_my_message(int type, int after, int limit, unsigned int* http_code, std::string* http_body);
@@ -148,8 +148,9 @@ namespace Slic3r {
         __declspec(dllexport) int get_task_plate_index(std::string task_id, int* plate_index);
         __declspec(dllexport) int get_slice_info(std::string project_id, std::string profile_id, int plate_index, std::string* slice_json);
         __declspec(dllexport) int query_bind_status(std::vector<std::string> query_list, unsigned int* http_code, std::string* http_body);
-        __declspec(dllexport) int modify_printer_name(std::string dev_id, std::string dev_name);
-        __declspec(dllexport) int get_camera_url(std::string dev_id, std::function<void(std::string)> callback);
+        __declspec(dllexport) int modify_printer_name(char* dev_id, char* dev_name);
+        __declspec(dllexport) void set_get_camera_url_callback(OnGetCameraUrlCS callback);
+        __declspec(dllexport) int get_camera_url(char* dev_id);
         __declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn, std::string* out);
 
 

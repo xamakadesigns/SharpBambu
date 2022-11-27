@@ -42,6 +42,7 @@ try
     Console.WriteLine("Setting up MQTT connection ...");
 
     networkPlugin.RefreshConnection();
+    networkPlugin.RefreshCameraUrl();
 
     while (true)
     {
