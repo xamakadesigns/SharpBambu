@@ -1,0 +1,184 @@
+﻿{
+    "print": {
+        "ams": {
+            "ams": [
+                {
+                    "humidity": "36",
+                    "id": "0",
+                    "temp": "23.0",
+                    "tray": [
+                        {
+                            "bed_temp": "0",
+                            "bed_temp_type": "0",
+                            "drying_temp": "0",
+                            "drying_time": "0",
+                            "id": "0",
+                            "nozzle_temp_max": "270",
+                            "nozzle_temp_min": "220",
+                            "tag_uid": "0000000000000000",
+                            "tray_color": "000000FF",
+                            "tray_diameter": "0.00",
+                            "tray_id_name": "",
+                            "tray_info_idx": "GFG99",
+                            "tray_sub_brands": "",
+                            "tray_type": "PETG",
+                            "tray_uuid": "00000000000000000000000000000000",
+                            "tray_weight": "0",
+                            "xcam_info": "000000000000000000000000"
+                        },
+                        {
+                            "bed_temp": "0",
+                            "bed_temp_type": "0",
+                            "drying_temp": "0",
+                            "drying_time": "0",
+                            "id": "1",
+                            "nozzle_temp_max": "270",
+                            "nozzle_temp_min": "220",
+                            "tag_uid": "0000000000000000",
+                            "tray_color": "0000FFFF",
+                            "tray_diameter": "0.00",
+                            "tray_id_name": "",
+                            "tray_info_idx": "GFG99",
+                            "tray_sub_brands": "",
+                            "tray_type": "PETG",
+                            "tray_uuid": "00000000000000000000000000000000",
+                            "tray_weight": "0",
+                            "xcam_info": "000000000000000000000000"
+                        },
+                        {
+                            "bed_temp": "0",
+                            "bed_temp_type": "0",
+                            "drying_temp": "0",
+                            "drying_time": "0",
+                            "id": "2",
+                            "nozzle_temp_max": "270",
+                            "nozzle_temp_min": "220",
+                            "tag_uid": "0000000000000000",
+                            "tray_color": "FFFFFFFF",
+                            "tray_diameter": "0.00",
+                            "tray_id_name": "",
+                            "tray_info_idx": "GFG99",
+                            "tray_sub_brands": "",
+                            "tray_type": "PETG",
+                            "tray_uuid": "00000000000000000000000000000000",
+                            "tray_weight": "0",
+                            "xcam_info": "000000000000000000000000"
+                        },
+                        {
+                            "id": "3"
+                        }
+                    ]
+                }
+            ],
+            "ams_exist_bits": "1",
+            "ams_new_detect_flag": false,
+            "insert_flag": true,
+            "power_on_flag": false,
+            "tray_exist_bits": "7",
+            "tray_is_bbl_bits": "7",
+            "tray_now": "255",
+            "tray_read_done_bits": "7",
+            "tray_reading_bits": "0",
+            "tray_tar": "255",
+            "version": 3
+        },
+        "ams_rfid_status": 0,
+        "ams_status": 0,
+        "bed_target_temper": 25.0,
+        "bed_temper": 25.0,
+        "big_fan1_speed": "0",
+        "big_fan2_speed": "0",
+        "chamber_temper": 28.0,
+        "command": "push_status",
+        "cooling_fan_speed": "0",
+        "fail_reason": "0",
+        "force_upgrade": false,
+        "gcode_file": "",
+        "gcode_file_prepare_percent": "0",
+        "gcode_start_time": "0",
+        "gcode_state": "IDLE",
+        "heatbreak_fan_speed": "0",
+        "hms": [],
+        "home_flag": 7,
+        "hw_switch_state": 0,
+        "ipcam": {
+            "ipcam_dev": "1",
+            "ipcam_record": "disable",
+            "timelapse": "disable"
+        },
+        "lifecycle": "product",
+        "lights_report": [
+            {
+                "mode": "on",
+                "node": "chamber_light"
+            },
+            {
+                "mode": "flashing",
+                "node": "work_light"
+            }
+        ],
+        "mc_percent": 0,
+        "mc_print_error_code": "0",
+        "mc_print_stage": "1",
+        "mc_print_sub_stage": 0,
+        "mc_remaining_time": 0,
+        "mess_production_state": "active",
+        "msg": 0,
+        "nozzle_target_temper": 25.0,
+        "nozzle_temper": 25.0,
+        "online": {
+            "ahb": false,
+            "rfid": false
+        },
+        "print_error": 0,
+        "print_gcode_action": 0,
+        "print_real_action": 0,
+        "print_type": "",
+        "profile_id": "",
+        "project_id": "",
+        "sdcard": false,
+        "sequence_id": "2021",
+        "spd_lvl": 2,
+        "spd_mag": 100,
+        "stg": [],
+        "stg_cur": -1,
+        "subtask_id": "",
+        "subtask_name": "",
+        "task_id": "",
+        "upgrade_state": {
+            "ahb_new_version_number": "",
+            "ams_new_version_number": "",
+            "consistency_request": false,
+            "dis_state": 1,
+            "err_code": 0,
+            "force_upgrade": false,
+            "message": "",
+            "module": "null",
+            "new_version_state": 1,
+            "ota_new_version_number": "01.01.01.00",
+            "progress": "0",
+            "sequence_id": 0,
+            "status": "IDLE"
+        },
+        "upload": {
+            "file_size": 0,
+            "finish_size": 0,
+            "message": "Good",
+            "oss_url": "",
+            "progress": 0,
+            "sequence_id": "0903",
+            "speed": 0,
+            "status": "idle",
+            "task_id": "",
+            "time_remaining": 0,
+            "trouble_id": ""
+        },
+        "wifi_signal": "-39dBm",
+        "xcam": {
+            "first_layer_inspector": false,
+            "print_halt": false,
+            "spaghetti_detector": false
+        },
+        "xcam_status": "0"
+    }
+}

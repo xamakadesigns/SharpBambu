@@ -1,0 +1,9 @@
+﻿{
+    "print": {
+        "command": "gcode_line",
+        "param": "G1 X51\n",
+        "reason": "SUCCESS",
+        "result": "SUCCESS",
+        "sequence_id": "20001"
+    }
+}
