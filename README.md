@@ -3,6 +3,7 @@
 
 This project is in **no way related or supported by Bambu Lab**. It is being developed for .Net developers wishing to interface with Bambu 3d printers (X1, X1-Carbon or P1P).
 
+- As always with this type of thing, use at your own risk!
 - Project is subject to lots of changes while I finish the .Net wrapper functions
 - Only Windows OS is being targetted for support at this time.
 
