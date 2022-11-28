@@ -70,6 +70,7 @@ bambu_networking.dll is a closed source project maintained by Bambu Lab. It is a
 - ⬜ Able to upload gcode to the printer and begin a print
 - ⬜ Able to issue commands to the wrapper via PowerShell (such as start a print job or load/unload the AMS)
 - ⬜ Software "Emergency stop" button
+- ⬜ Pause/unpause prints (scriptable to support ideas which are not implemented in gcode, like chamber pre-heating & wait for temperature to be reached)
 - ⬜ Create a C# library (refactor) and separate it from the test console app
 - ⬜ Creation of a small status app for the printer
 - ⬜ Json/MQTT message inspector
