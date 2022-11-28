@@ -68,6 +68,7 @@ namespace BBL {
     // OnLocalConnectedFn
 typedef void (*OnServerConnectedFnCS)(void);
 typedef void (*OnMessageFnCS)(BSTR dev_id, BSTR msg);
+typedef void (*OnGetCameraUrlCS)(BSTR cameraUrl);
 // OnMessageFn
 // OnHttpErrorFn
 // GetCountryCodeFn

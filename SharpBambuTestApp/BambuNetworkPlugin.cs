@@ -18,6 +18,7 @@ namespace Test
         private OnServerConnectedDelegate InstanceOnServerConnectedDelegate;
         private OnPrinterMessageDelegate InstanceOnCloudMessageDelegate;
         private OnPrinterMessageDelegate InstanceOnLocalMessageDelegate;
+        private OnGetCameraUrlDelegate InstanceOnGetCameraUrlDelegate;
 
         public Dictionary<string, BambuPrinter> Printers { get; } = new Dictionary<string, BambuPrinter>();
 
@@ -26,6 +27,7 @@ namespace Test
             InstanceOnServerConnectedDelegate = OnServerConnectedEvent;
             InstanceOnCloudMessageDelegate = OnCloudMessageEvent;
             InstanceOnLocalMessageDelegate = OnLocalMessageEvent;
+            InstanceOnGetCameraUrlDelegate = OnGetCameraUrlEvent;
         }
 
         /// <summary>
@@ -76,6 +78,9 @@ namespace Test
         
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_country_code([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder countryCode);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern int get_camera_url ([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int send_message_to_printer([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder jsonMessage, int qos);
@@ -194,6 +199,9 @@ namespace Test
         private delegate void OnLocalConnectedDelegate(int status, string deviceId, string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate void OnGetCameraUrlDelegate([MarshalAs(UnmanagedType.BStr)] string url);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUserLogin(int onlineLogin, bool login);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
@@ -241,6 +249,9 @@ namespace Test
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int set_on_local_message_fn([MarshalAs(UnmanagedType.FunctionPtr)] OnPrinterMessageDelegate callbackFunction);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern void set_get_camera_url_callback([MarshalAs(UnmanagedType.FunctionPtr)] OnGetCameraUrlDelegate callbackFunction);
 
         // enums
         public enum SendingPrintJobStage
@@ -423,6 +434,7 @@ namespace Test
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_ssdp_msg_fn, result: {result}");
 
+            set_get_camera_url_callback(InstanceOnGetCameraUrlDelegate);
         }
 
         private void OnSsdpMessageEvent(string topic)
@@ -458,7 +470,10 @@ namespace Test
 
             if (!Printers.ContainsKey(deviceId))
                 Printers.Add(deviceId, new BambuPrinter(deviceId));
-            
+
+            if (printerMessage == null)
+                return;
+
             var printer = Printers[deviceId];
             printer.ProcessMessage(printerMessage);
         }
@@ -470,6 +485,9 @@ namespace Test
 
             if (!Printers.ContainsKey(deviceId))
                 Printers.Add(deviceId, new BambuPrinter(deviceId));
+
+            if (printerMessage == null)
+                return;
 
             var printer = Printers[deviceId];
             printer.ProcessMessage(printerMessage);
@@ -491,6 +509,12 @@ namespace Test
         {
             Console.WriteLine("OnUserLoginEvent");
             throw new NotImplementedException();
+        }
+
+        private void OnGetCameraUrlEvent(string url)
+        {
+            Debug.Print($"Camera URL = {url}");
+            Printers[Printers.Keys.First()].CameraUrl = url; // todo should be printer-specific callback
         }
 
         /// <summary>
@@ -782,6 +806,17 @@ namespace Test
 
             if (result != 0)
                 throw new Exception($"Unable to unsubscribe from module {module}");
+        }
+
+        public void RefreshCameraUrl()
+        {
+            if (string.IsNullOrEmpty(SelectedMachineDeviceId))
+                throw new Exception("DeviceId is not set; first, please login and bind the printer with Bambu Studio");
+
+            var result = get_camera_url(new StringBuilder(SelectedMachineDeviceId));
+
+            if (result != 0)
+                throw new Exception($"Unable to refresh camera url, result: {result}");
         }
 
         public void WipeNozzle()
