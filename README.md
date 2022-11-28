@@ -63,12 +63,15 @@ bambu_networking.dll is a closed source project maintained by Bambu Lab. It is a
 - ✅ Able to issue gcode commands
 - ✅ Able to view AMS humidity level
 - ✅ Able to wipe nozzle while printing (just a macro copied from Bambu Studio start gcode - please make your own, better one)
-- ⬜ Able to get the camera feed url and/or establish a tunnel
+- ✅ Able to get the camera feed url
+- ⬜ Able to establish a tunnel with the printer
+- ⬜ Able to list/delete/download files from the printer
 - ⬜ Able to upload gcode to the printer and begin a print
 - ⬜ Able to issue commands to the wrapper via PowerShell (such as start a print job or load/unload the AMS)
 - ⬜ Create a C# library (refactor) and separate it from the test console app
 - ⬜ Creation of a small status app for the printer
 - ⬜ Json/MQTT message inspector
+- ⬜ IFTTT integration (babysitting / ie. notify when layer or percentage reached, or integrate with your other IOT junk)
 - ⬜ Support for Repetier
 - ⬜ Support for Octoprint
 - ⬜ Support for Simplify3d
