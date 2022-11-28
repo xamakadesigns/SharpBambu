@@ -3,6 +3,7 @@
 
 This project is in **no way related or supported by Bambu Lab**. It is being developed for .Net developers wishing to interface with Bambu 3d printers (X1, X1-Carbon or P1P).
 
+- As always with this type of thing, use at your own risk!
 - Project is subject to lots of changes while I finish the .Net wrapper functions
 - Only Windows OS is being targetted for support at this time.
 
@@ -68,6 +69,8 @@ bambu_networking.dll is a closed source project maintained by Bambu Lab. It is a
 - ⬜ Able to list/delete/download files from the printer
 - ⬜ Able to upload gcode to the printer and begin a print
 - ⬜ Able to issue commands to the wrapper via PowerShell (such as start a print job or load/unload the AMS)
+- ⬜ Software "Emergency stop" button
+- ⬜ Pause/unpause prints (scriptable to support ideas which are not implemented in gcode, like chamber pre-heating & wait for temperature to be reached)
 - ⬜ Create a C# library (refactor) and separate it from the test console app
 - ⬜ Creation of a small status app for the printer
 - ⬜ Json/MQTT message inspector
