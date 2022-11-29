@@ -461,6 +461,9 @@ namespace Test
 
             // Copying what Bambu Slicer does .. not sure why this is needed
             SelectedMachineDeviceId = SelectedMachineDeviceId;
+
+            if (!Printers.ContainsKey(SelectedMachineDeviceId))
+                Printers.Add(SelectedMachineDeviceId, new BambuPrinter(SelectedMachineDeviceId));
         }
 
         private void OnCloudMessageEvent(string deviceId, string jsonMessage)
@@ -514,6 +517,7 @@ namespace Test
         private void OnGetCameraUrlEvent(string url)
         {
             Debug.Print($"Camera URL = {url}");
+
             Printers[Printers.Keys.First()].CameraUrl = url; // todo should be printer-specific callback
         }
 
