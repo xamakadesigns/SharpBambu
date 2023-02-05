@@ -15,12 +15,25 @@ namespace Test
 {
     public class BambuNetworkPlugin : IDisposable
     {
+        // Callback functions need to be scoped here
         private OnServerConnectedDelegate InstanceOnServerConnectedDelegate;
         private OnPrinterMessageDelegate InstanceOnCloudMessageDelegate;
         private OnPrinterMessageDelegate InstanceOnLocalMessageDelegate;
         private OnGetCameraUrlDelegate InstanceOnGetCameraUrlDelegate;
+        private OnLocalConnectedDelegate InstanceOnLocalConnectedDelegate;
+        //private OnLoginDelegate InstanceOnLoginDelegate;
+        private OnUserLoginDelegate InstanceOnUserLoginDelegate;
+        private OnSSDPMessageDelegate InstanceOnSSDPMessageDelegate;
+        private OnCancelDelegate InstanceOnCancelDelegate;
+        private OnGetCountryCodeDelegate InstanceOnGetCountryCodeDelegate;
+        private OnHttpErrorDelegate InstanceOnHttpErrorDelegate;
+        private OnProgressUpdatedDelegate InstanceOnProgressUpdatedDelegate;
+        private OnResultDelegate InstanceOnResultDelegate;
+        private OnUpdateStatusDelegate InstanceOnUpdateStatusDelegate;
+        private OnWasCanceledDelegate InstanceOnWasCanceledDelegate;
+        private OnPrinterConnectedDelegate InstanceOnPrinterConnectedDelegate;
 
-        public Dictionary<string, BambuPrinter> Printers { get; } = new Dictionary<string, BambuPrinter>();
+        public BambuPrinter Printer { get; private set; } = new BambuPrinter();
 
         public BambuNetworkPlugin()
         {
@@ -28,6 +41,17 @@ namespace Test
             InstanceOnCloudMessageDelegate = OnCloudMessageEvent;
             InstanceOnLocalMessageDelegate = OnLocalMessageEvent;
             InstanceOnGetCameraUrlDelegate = OnGetCameraUrlEvent;
+            InstanceOnLocalConnectedDelegate = OnLocalConnectEvent;
+            InstanceOnUserLoginDelegate = OnUserLoginEvent;
+            InstanceOnSSDPMessageDelegate = OnSsdpMessageEvent;
+            InstanceOnCancelDelegate = OnCancelEvent;
+            InstanceOnGetCountryCodeDelegate = OnGetCountryCodeEvent;
+            InstanceOnHttpErrorDelegate = OnHttpErrorEvent;
+            InstanceOnProgressUpdatedDelegate = OnProgressUpdatedEvent;
+            InstanceOnResultDelegate = OnResultEvent;
+            InstanceOnUpdateStatusDelegate = OnUpdateStatusEvent;
+            InstanceOnWasCanceledDelegate = OnWasCanceledEvent;
+            InstanceOnPrinterConnectedDelegate = OnPrinterConnectedEvent;
         }
 
         /// <summary>
@@ -119,7 +143,7 @@ namespace Test
         private static extern int connect_server();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern int connect_printer();
+        private static extern int connect_printer([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder ipAddress, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder username, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder password);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int disconnect_printer();
@@ -172,31 +196,31 @@ namespace Test
 
         // events
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnSSDPMessageDelegate(string topic);
+        private delegate void OnSSDPMessageDelegate([MarshalAs(UnmanagedType.BStr)] string topic);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUserLoginDelegate(int onlineLogin, bool login);
         
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnPrinterConnectedDelegate(string topic);
+        private delegate void OnPrinterConnectedDelegate([MarshalAs(UnmanagedType.BStr)] string topic);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnServerConnectedDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnHttpErrorDelegate(uint httpStatusCode, string httpBody);
+        private delegate void OnHttpErrorDelegate(uint httpStatusCode, [MarshalAs(UnmanagedType.BStr)] string httpBody);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnPrinterMessageDelegate([MarshalAs(UnmanagedType.BStr)] string deviceId, [MarshalAs(UnmanagedType.BStr)] string message);
 
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnMessageArrivedDelegate(string deviceInfoJson);
+        //[UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        //private delegate void OnMessageArrivedDelegate([MarshalAs(UnmanagedType.BStr)] string deviceInfoJson);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate string OnGetCountryCodeDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnLocalConnectedDelegate(int status, string deviceId, string message);
+        private delegate void OnLocalConnectedDelegate(int status, [MarshalAs(UnmanagedType.BStr)] string deviceId, [MarshalAs(UnmanagedType.BStr)] string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnGetCameraUrlDelegate([MarshalAs(UnmanagedType.BStr)] string url);
@@ -205,22 +229,22 @@ namespace Test
         private delegate void OnUserLogin(int onlineLogin, bool login);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnUpdateStatusDelegate(int status, int code, string message);
+        private delegate void OnUpdateStatusDelegate(int status, int code, [MarshalAs(UnmanagedType.BStr)] string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate bool OnWasCanceledDelegate(); // todo
+        private delegate bool OnWasCanceledDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate bool OnCancelDelegate(); // todo
+        private delegate bool OnCancelDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnProgressUpdatedDelegate(int progress); // todo
+        private delegate void OnProgressUpdatedDelegate(int progress);
+
+        //[UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        //private delegate void OnLoginDelegate(int retcode, [MarshalAs(UnmanagedType.BStr)] string info);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnLoginDelegate(int retcode, string info); // todo
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnResultDelegate(int retcode, string info); // todo
+        private delegate void OnResultDelegate(int retcode, [MarshalAs(UnmanagedType.BStr)] string info);
 
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
@@ -253,114 +277,6 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern void set_get_camera_url_callback([MarshalAs(UnmanagedType.FunctionPtr)] OnGetCameraUrlDelegate callbackFunction);
 
-        // enums
-        public enum SendingPrintJobStage
-        {
-            PrintingStageCreate = 0,
-            PrintingStageUpload = 1,
-            PrintingStageWaiting = 2,
-            PrintingStageSending = 3,
-            PrintingStageRecord = 4,
-            PrintingStageFinished = 5,
-        };
-
-        public enum PublishingStage
-        {
-            PublishingCreate = 0,
-            PublishingUpload = 1,
-            PublishingWaiting = 2,
-            PublishingJumpUrl = 3,
-        };
-
-        public enum BindJobStage
-        {
-            LoginStageConnect = 0,
-            LoginStageLogin = 1,
-            LoginStageWaitForLogin = 2,
-            LoginStageGetIdentify = 3,
-            LoginStageWaitAuth = 4,
-            LoginStageFinished = 5,
-        };
-
-        public enum ConnectStatus
-        {
-            ConnectStatusOk = 0,
-            ConnectStatusFailed = 1,
-            ConnectStatusLost = 2,
-        };
-
-        // constants
-        public const int BAMBU_NETWORK_SUCCESS = 0;
-        public const int BAMBU_NETWORK_ERR_INVALID_HANDLE = -1;
-        public const int BAMBU_NETWORK_ERR_CONNECT_FAILED = -2;
-        public const int BAMBU_NETWORK_ERR_DISCONNECT_FAILED = -3;
-        public const int BAMBU_NETWORK_ERR_SEND_MSG_FAILED = -4;
-        public const int BAMBU_NETWORK_ERR_BIND_FAILED = -5;
-        public const int BAMBU_NETWORK_ERR_UNBIND_FAILED = -6;
-        public const int BAMBU_NETWORK_ERR_PRINT_FAILED = -7;
-        public const int BAMBU_NETWORK_ERR_LOCAL_PRINT_FAILED = -8;
-        public const int BAMBU_NETWORK_ERR_REQUEST_SETTING_FAILED = -9;
-        public const int BAMBU_NETWORK_ERR_PUT_SETTING_FAILED = -10;
-        public const int BAMBU_NETWORK_ERR_GET_SETTING_LIST_FAILED = -11;
-        public const int BAMBU_NETWORK_ERR_DEL_SETTING_FAILED = -12;
-        public const int BAMBU_NETWORK_ERR_GET_USER_PRINTINFO_FAILED = -13;
-        public const int BAMBU_NETWORK_ERR_GET_PRINTER_FIRMWARE_FAILED = -14;
-        public const int BAMBU_NETWORK_ERR_QUERY_BIND_INFO_FAILED = -15;
-        public const int BAMBU_NETWORK_ERR_MODIFY_PRINTER_NAME_FAILED = -16;
-        public const int BAMBU_NETWORK_ERR_FILE_NOT_EXIST = -17;
-        public const int BAMBU_NETWORK_ERR_FILE_OVER_SIZE = -18;
-        public const int BAMBU_NETWORK_ERR_CHECK_MD5_FAILED = -19;
-        public const int BAMBU_NETWORK_ERR_TIMEOUT = -20;
-        public const int BAMBU_NETWORK_ERR_CANCELED = -21;
-        public const int BAMBU_NETWORK_ERR_INVALID_PARAMS = -22;
-        public const int BAMBU_NETWORK_ERR_INVALID_RESULT = -23;
-        public const int BAMBU_NETWORK_ERR_FTP_UPLOAD_FAILED = -24;
-        public const int BAMBU_NETWORK_ERR_FTP_LOGIN_DENIED = -25;
-
-        // structs
-
-        /* print job*/
-        public struct PrintParams
-        {
-            /* basic info */
-            string dev_id;
-            string task_name;
-            string project_name;
-            string preset_name;
-            string filename;
-            string config_filename;
-            int plate_index;
-            string ftp_file;
-            string ftp_file_md5;
-            string ams_mapping;
-            string ams_mapping_info;
-            string connection_type;
-            string comments;
-
-            /* access options */
-            string dev_ip;
-            string username;
-            string password;
-
-            /*user options */
-            bool task_bed_leveling;      /* bed leveling of task */
-            bool task_flow_cali;         /* flow calibration of task */
-            bool task_vibration_cali;    /* vibration calibration of task */
-            bool task_layer_inspect;     /* first layer inspection of task */
-            bool task_record_timelapse;  /* record timelapse of task */
-            bool task_use_ams;
-        };
-
-        public struct PublishParams
-        {
-            string project_name;
-            string project_3mf_file;
-            string preset_name;
-            string project_model_id;
-            string design_id;
-            string config_filename;
-        };
-
         #endregion
 
         /// <summary>
@@ -373,19 +289,19 @@ namespace Test
         {
             ResolveBambuNetworkingDll(autoUpdateDll);
 
-            Debug.Print($"Setting data dir to {BambuStudioDataFolder}");
+            Console.WriteLine($"Setting data dir to {BambuStudioDataFolder}");
             set_data_dir(new StringBuilder(BambuStudioDataFolder));
 
-            Debug.Print($"Setting dll dir to {BambuStudioPluginFolder}");
+            Console.WriteLine($"Setting dll dir to {BambuStudioPluginFolder}");
             set_dll_dir(new StringBuilder(BambuStudioPluginFolder));
 
-            Debug.Print("Initialize network agent wrapper dll");
+            Console.WriteLine("Initialize network agent wrapper dll");
             var result = initialize_network_module();
 
             if (result != 0)
                 throw new Exception("Bambu Network Plugin wrapper DLL failed to initialize");
 
-            Debug.Print("Creating network agent");
+            Console.WriteLine("Creating network agent");
             Agent = bambu_network_create_agent();
 
             if (Agent == UIntPtr.Zero)
@@ -396,17 +312,17 @@ namespace Test
         {
             var result = 0;
 
-            Debug.Print("Setting up callbacks");
+            Console.WriteLine("Setting up callbacks");
 
-            result = set_on_user_login_fn(new OnUserLoginDelegate(OnUserLoginEvent));
+            result = set_on_user_login_fn(InstanceOnUserLoginDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_user_login_fn, result: {result}");
 
-            result = set_on_local_connect_fn(new OnLocalConnectedDelegate(OnLocalConnectEvent));
+            result = set_on_local_connect_fn(InstanceOnLocalConnectedDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_local_connect_fn, result: {result}");
 
-            result = set_on_http_error_fn(new OnHttpErrorDelegate(OnHttpErrorEvent));
+            result = set_on_http_error_fn(InstanceOnHttpErrorDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_http_error_fn, result: {result}");
 
@@ -422,31 +338,31 @@ namespace Test
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_server_connected_fn, result: {result}");
 
-            result = set_get_country_code_fn(new OnGetCountryCodeDelegate(OnGetCountryCodeEvent));
+            result = set_get_country_code_fn(InstanceOnGetCountryCodeDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_get_country_code_fn, result: {result}");
 
-            result = set_on_printer_connected_fn(new OnPrinterConnectedDelegate(OnPrinterConnectedEvent));
+            result = set_on_printer_connected_fn(InstanceOnPrinterConnectedDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_printer_connected_fn, result: {result}");
 
-            result = set_on_ssdp_msg_fn(new OnSSDPMessageDelegate(OnSsdpMessageEvent));
+            result = set_on_ssdp_msg_fn(InstanceOnSSDPMessageDelegate);
             if (result != 0)
                 throw new Exception($"Unable to initialize callback: set_on_ssdp_msg_fn, result: {result}");
 
+            // returns void
             set_get_camera_url_callback(InstanceOnGetCameraUrlDelegate);
         }
 
         private void OnSsdpMessageEvent(string topic)
         {
-            Console.WriteLine("OnSsdpMessageEvent");
+            Console.WriteLine($"OnSsdpMessageEvent: topic={topic}");
             throw new NotImplementedException();
         }
 
         private void OnPrinterConnectedEvent(string topic)
         {
-            Console.WriteLine("OnPrinterConnectedEvent");
-            throw new NotImplementedException();
+            Console.WriteLine($"OnPrinterConnectedEvent: topic={topic}");
         }
 
         private string OnGetCountryCodeEvent()
@@ -457,10 +373,7 @@ namespace Test
 
         private void OnServerConnectedEvent()
         {
-            Debug.Print("Server connected");
-
-            // Copying what Bambu Slicer does .. not sure why this is needed
-            SelectedMachineDeviceId = SelectedMachineDeviceId;
+            Console.WriteLine("OnServerConnectedEvent");
         }
 
         private void OnCloudMessageEvent(string deviceId, string jsonMessage)
@@ -468,14 +381,10 @@ namespace Test
             var message = JsonConvert.DeserializeObject<MessageDto>(jsonMessage);
             var printerMessage = message?.PrinterMessage;
 
-            if (!Printers.ContainsKey(deviceId))
-                Printers.Add(deviceId, new BambuPrinter(deviceId));
-
             if (printerMessage == null)
                 return;
 
-            var printer = Printers[deviceId];
-            printer.ProcessMessage(printerMessage);
+            Printer.ProcessMessage(printerMessage);
         }
 
         private void OnLocalMessageEvent(string deviceId, string jsonMessage)
@@ -483,38 +392,66 @@ namespace Test
             var message = JsonConvert.DeserializeObject<MessageDto>(jsonMessage);
             var printerMessage = message?.PrinterMessage;
 
-            if (!Printers.ContainsKey(deviceId))
-                Printers.Add(deviceId, new BambuPrinter(deviceId));
-
             if (printerMessage == null)
                 return;
 
-            var printer = Printers[deviceId];
-            printer.ProcessMessage(printerMessage);
+            Printer.ProcessMessage(printerMessage);
         }
         
         private void OnHttpErrorEvent(uint httpStatusCode, string httpBody)
         {
-            Console.WriteLine("OnHttpErrorEvent");
+            Console.WriteLine($"OnHttpErrorEvent: httpStatusCode={httpStatusCode}, string={httpBody}");
             throw new NotImplementedException();
         }
 
         private void OnLocalConnectEvent(int status, string deviceId, string message)
         {
-            Console.WriteLine("OnLocalConnectEvent");
-            throw new NotImplementedException();
+            Console.WriteLine($"OnLocalConnectEvent: Printer {deviceId} is locally connected with status {status}; message:");
+            Console.WriteLine(message);
         }
 
         private void OnUserLoginEvent(int onlineLogin, bool login)
         {
-            Console.WriteLine("OnUserLoginEvent");
+            Console.WriteLine($"OnUserLoginEvent: onlineLogin={onlineLogin}, login={login}");
             throw new NotImplementedException();
         }
 
         private void OnGetCameraUrlEvent(string url)
         {
-            Debug.Print($"Camera URL = {url}");
-            Printers[Printers.Keys.First()].CameraUrl = url; // todo should be printer-specific callback
+            Console.WriteLine($"OnGetCameraUrlEvent: Camera URL={url}");
+
+            Printer.CameraUrl = url;
+        }
+
+        private bool OnWasCanceledEvent()
+        {
+            Console.WriteLine($"OnWasCanceledEvent");
+            throw new NotImplementedException();
+        }
+
+        private void OnUpdateStatusEvent(int status, int code, string message)
+        {
+            Console.WriteLine($"OnUpdateStatusEvent: status={status}, code={code}, message:");
+            Console.WriteLine(message);
+            throw new NotImplementedException();
+        }
+
+        private void OnResultEvent(int retcode, string info)
+        {
+            Console.WriteLine($"OnResultEvent: onlineLogin={retcode}, login={info}");
+            throw new NotImplementedException();
+        }
+
+        private void OnProgressUpdatedEvent(int progress)
+        {
+            Console.WriteLine($"OnProgressUpdatedEvent: progress={progress}");
+            throw new NotImplementedException();
+        }
+
+        private bool OnCancelEvent()
+        {
+            Console.WriteLine($"OnCancelEvent");
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -524,7 +461,7 @@ namespace Test
         /// <exception cref="FileNotFoundException">Thrown when bambu_networking.dll is missing</exception>
         private void ResolveBambuNetworkingDll(bool autoUpdateDll)
         {
-            Debug.Print("Resolving bambu_networking.dll");
+            Console.WriteLine("Resolving bambu_networking.dll");
 
             var dllDestinationPath = ApplicationFolder + "\\bambu_networking.dll";
 
@@ -557,7 +494,7 @@ namespace Test
         /// <exception cref="Exception">Thrown when bambu_networking.dll is unable to set config folder path to the desired location</exception>
         public void SetConfigFolder(string folderPath = "")
         {
-            Debug.Print("Setting config folder");
+            Console.WriteLine("Setting config folder");
 
             if (string.IsNullOrEmpty(folderPath))
             {
@@ -587,7 +524,7 @@ namespace Test
         /// </summary>
         public void InitializeNetworkAgentLog()
         {
-            Debug.Print("Initializing Bambu Network Plugin log");
+            Console.WriteLine("Initializing Bambu Network Plugin log");
 
             var result = init_log();
             if (result != 0)
@@ -596,7 +533,8 @@ namespace Test
 
         public void ConnectServer()
         {
-            Debug.Print("Connecting to Bambu server");
+            LanMode = false;
+            Console.WriteLine("Connecting to Bambu server");
 
             var result = connect_server();
 
@@ -604,11 +542,12 @@ namespace Test
                 throw new Exception($"Unable to connect to Bambu server; result code {result}");
         }
 
-        public void ConnectPrinter()
+        public void ConnectPrinter(string deviceId, string ipAddress, string username, string password)
         {
-            Debug.Print("Connecting to printer");
+            LanMode = true;
+            Console.WriteLine($"Connecting to printer {deviceId} at {ipAddress}");
 
-            var result = connect_printer();
+            var result = connect_printer(new StringBuilder(deviceId), new StringBuilder(ipAddress), new StringBuilder(username), new StringBuilder(password));
 
             if (result != 0)
                 throw new Exception($"Unable to connect to printer; result code {result}");
@@ -616,7 +555,7 @@ namespace Test
 
         public void DisconnectPrinter()
         {
-            Debug.Print("Disconnecting printer");
+            Console.WriteLine("Disconnecting printer");
 
             var result = disconnect_printer();
 
@@ -626,7 +565,7 @@ namespace Test
 
         public void UserLogout()
         {
-            Debug.Print("User logout");
+            Console.WriteLine("User logout");
 
             var result = user_logout();
 
@@ -644,21 +583,21 @@ namespace Test
 
         public string BuildLoginCmd()
         {
-            Debug.Print("Build login cmd");
+            Console.WriteLine("Build login cmd");
 
             return build_login_cmd();
         }
 
         public string BuildLogoutCmd()
         {
-            Debug.Print("Build logout cmd");
+            Console.WriteLine("Build logout cmd");
 
             return build_logout_cmd();
         }
 
         public string BuildLoginInfo()
         {
-            Debug.Print("Build login info");
+            Console.WriteLine("Build login info");
 
             return build_login_info();
         }
@@ -670,7 +609,7 @@ namespace Test
         /// </summary>
         public void Dispose()
         {
-            Debug.Print("Dispose and deallocate Bambu Network Plugin");
+            Console.WriteLine("Dispose and deallocate Bambu Network Plugin");
 
             if (Agent != UIntPtr.Zero)
             {
@@ -686,7 +625,7 @@ namespace Test
 
         public void SetCertFile(string certFolder, string certFilename)
         {
-            Debug.Print($"Set cert file {certFolder}\\{certFilename}");
+            Console.WriteLine($"Set cert file {certFolder}\\{certFilename}");
 
             var result = set_cert_file(new StringBuilder(certFolder), new StringBuilder(certFilename));
 
@@ -696,7 +635,7 @@ namespace Test
 
         public void SetCountryCode(string countryCode)
         {
-            Debug.Print($"Set country code {countryCode}");
+            Console.WriteLine($"Set country code {countryCode}");
 
             int result = set_country_code(new StringBuilder(countryCode));
 
@@ -738,7 +677,7 @@ namespace Test
 
             if (LanMode)
             {
-                Debug.Print($"Sending message (via lan) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
+                Console.WriteLine($"Sending message (via lan) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
 
                 var result = send_message_to_printer(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
@@ -747,7 +686,7 @@ namespace Test
             }
             else
             {
-                Debug.Print($"Sending message (via cloud) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
+                Console.WriteLine($"Sending message (via cloud) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
 
                 var result = send_message(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
@@ -781,7 +720,7 @@ namespace Test
 
         public void RefreshConnection()
         {
-            Debug.Print("RefreshConnection (connect to mqtt)");
+            Console.WriteLine("RefreshConnection (connect to mqtt)");
 
             var result = refresh_connection();
 
@@ -791,7 +730,7 @@ namespace Test
 
         public void Subscribe(string module = "app")
         {
-            Debug.Print($"Subscribe to module {module}");
+            Console.WriteLine($"Subscribe to module {module}");
 
             var result = start_subscribe(new StringBuilder(module));
 
@@ -800,7 +739,7 @@ namespace Test
         }
         public void Unsubscribe(string module = "app")
         {
-            Debug.Print($"Unsubscribe from module {module}");
+            Console.WriteLine($"Unsubscribe from module {module}");
 
             var result = stop_subscribe(new StringBuilder(module));
 

@@ -9,9 +9,8 @@ namespace SharpBambuTestApp
 {
     public class BambuPrinter
     {
-        internal BambuPrinter(string deviceId)
+        internal BambuPrinter()
         {
-            DeviceId = deviceId;
             AmsList.Add(new BambuAms("0"));
             AmsList.Add(new BambuAms("1"));
             AmsList.Add(new BambuAms("2"));
@@ -23,8 +22,6 @@ namespace SharpBambuTestApp
         public double NozzleTemperature { get; private set; }
         public double BedTargetTemperature { get; private set; }
         public double NozzleTargetTemperature { get; private set; }
-        public string DeviceId { get; }
-
         public List <BambuAms> AmsList { get; } = new List<BambuAms>();
         public string CameraUrl { get; internal set; }
 

@@ -450,3 +450,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+*.secret.*

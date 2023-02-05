@@ -1,8 +1,11 @@
 ﻿// https://blog.elmah.io/debugging-system-accessviolationexception/
 // https://limbioliong.wordpress.com/2011/06/16/returning-strings-from-a-c-api/
 // See https://aka.ms/new-console-template for more information
+using Microsoft.Extensions.Configuration;
+using SharpBambuTestApp;
 using Test;
 
+var config = new BambuWrapperConfig().Load();
 
 var networkPlugin = new BambuNetworkPlugin();
 
@@ -20,7 +23,8 @@ networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
 networkPlugin.Subscribe();
-networkPlugin.ConnectServer();
+//networkPlugin.ConnectServer();
+networkPlugin.ConnectPrinter(networkPlugin.SelectedMachineDeviceId, config.IpAddress, config.Username, config.Password);
 
 try
 {
@@ -30,8 +34,8 @@ try
     //Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
     Console.WriteLine($"User Avatar: {networkPlugin.UserAvatar}");
     Console.WriteLine($"User Logged in: {networkPlugin.IsUserLoggedIn}");
-    Console.WriteLine($"Server Connected: {networkPlugin.IsServerConnected}");
-    //Console.WriteLine($"Selected Machine: {networkPlugin.CurrentMachineDeviceId}");
+    Console.WriteLine($"Cloud Server Connected: {networkPlugin.IsServerConnected}");
+    Console.WriteLine($"Selected Machine: {networkPlugin.SelectedMachineDeviceId}");
 
     while(!networkPlugin.IsServerConnected)
     {
