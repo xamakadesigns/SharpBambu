@@ -16,6 +16,9 @@
 #pragma comment(lib, "kernel32.lib")
 
 #include "NetworkAgent.hpp"
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
 using namespace std;
 using namespace BBL;
 
@@ -903,7 +906,7 @@ void OnMsgArrivedFnWrapper_start_print(int status, int code, std::string msg)
         OnUpdateStatusFnCS_ptr_start_print(status, code, msg_bstr);
 }
 
-__declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+__declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn)
 {
     OnUpdateStatusFnCS_ptr_start_print = update_fn;
 
@@ -926,7 +929,7 @@ void OnMsgArrivedFnWrapper_start_print_with_record(int status, int code, std::st
         OnUpdateStatusFnCS_ptr_start_print_with_record(status, code, msg_bstr);
 }
 
-__declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+__declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn)
 {
     OnUpdateStatusFnCS_ptr_start_print_with_record = update_fn;
 
@@ -949,16 +952,41 @@ void OnMsgArrivedFnWrapper_send_gcode_to_sdcard(int status, int code, std::strin
         OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard(status, code, msg_bstr);
 }
 
-__declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+WasCancelledFnCS WasCancelledFnCS_ptr_start_send_gcode_to_sdcard = nullptr;
+
+bool WasCancelledFnWrapper_start_send_gcode_to_sdcard()
+{
+    if (WasCancelledFnCS_ptr_start_send_gcode_to_sdcard != nullptr)
+        return WasCancelledFnCS_ptr_start_send_gcode_to_sdcard();
+    else
+        return false;
+}
+
+__declspec(dllexport) int start_send_gcode_to_sdcard(char* params_json, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn)
 {
     OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard = update_fn;
+    WasCancelledFnCS_ptr_start_send_gcode_to_sdcard = cancel_fn;
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK1");
+    
+    std::string str_json = params_json;
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK2");
 
-	int ret = 0;
+    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: %1%") % params_json;
+    json j = json::parse(str_json);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK3");
+    
+    PrintParams params = j.get<PrintParams>();
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK4");
+    
+    int ret = 0;
 	if (network_agent && start_send_gcode_to_sdcard_ptr) {
-		ret = start_send_gcode_to_sdcard_ptr(network_agent, params, OnMsgArrivedFnWrapper_send_gcode_to_sdcard, cancel_fn);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK5");
+		ret = start_send_gcode_to_sdcard_ptr(network_agent, params, OnMsgArrivedFnWrapper_send_gcode_to_sdcard, WasCancelledFnWrapper_start_send_gcode_to_sdcard);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK6");
 		BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
 			% network_agent % ret % params.dev_id % params.task_name % params.project_name;
 	}
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK7");
 	return ret;
 }
 
@@ -972,13 +1000,37 @@ void OnMsgArrivedFnWrapper_start_local_print(int status, int code, std::string m
         OnUpdateStatusFnCS_ptr_start_local_print(status, code, msg_bstr);
 }
 
-__declspec(dllexport) int start_local_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+WasCancelledFnCS WasCancelledFnCS_ptr_start_local_print = nullptr;
+
+bool WasCancelledFnWrapper_start_local_print()
+{
+    if (WasCancelledFnCS_ptr_start_local_print != nullptr)
+        return WasCancelledFnCS_ptr_start_local_print();
+    else
+        return false;
+}
+
+__declspec(dllexport) int start_local_print(char* params_json, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn)
 {
     OnUpdateStatusFnCS_ptr_start_local_print = update_fn;
+    WasCancelledFnCS_ptr_start_local_print = cancel_fn;
+
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK1");
+    
+    std::string str_json = params_json;
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK2");
+
+    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: %1%") % params_json;
+    json j = json::parse(str_json);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK3");
+    
+    PrintParams params = j.get<PrintParams>();
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK4");
+    
 
     int ret = 0;
     if (network_agent && start_local_print_ptr) {
-        ret = start_local_print_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_local_print, cancel_fn);
+        ret = start_local_print_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_local_print, WasCancelledFnWrapper_start_local_print);
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
                 %network_agent %ret %params.dev_id %params.task_name %params.project_name;
     }
@@ -1017,7 +1069,7 @@ __declspec(dllexport) int put_setting(std::string setting_id, std::string name, 
     return ret;
 }
 
-__declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressFn pro_fn, WasCancelledFn cancel_fn)
+__declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressFn pro_fn, WasCancelledFnCS cancel_fn)
 {
     int ret = 0;
     if (network_agent && get_setting_list_ptr) {
@@ -1182,7 +1234,7 @@ void OnMsgArrivedFnWrapper_start_publish(int status, int code, std::string msg)
         OnUpdateStatusFnCS_ptr_start_publish(status, code, msg_bstr);
 }
 
-__declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn, std::string *out)
+__declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn, std::string *out)
 {
     OnUpdateStatusFnCS_ptr_start_publish = update_fn;
 

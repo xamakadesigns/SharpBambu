@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,42 +13,42 @@ namespace SharpBambuTestApp
         public struct PrintParams
         {
             /* basic info */
-            string dev_id;
-            string task_name;
-            string project_name;
-            string preset_name;
-            string filename;
-            string config_filename;
-            int plate_index;
-            string ftp_file;
-            string ftp_file_md5;
-            string ams_mapping;
-            string ams_mapping_info;
-            string connection_type;
-            string comments;
+            public string dev_id;
+            public string task_name;
+            public string project_name;
+            public string preset_name;
+            public string filename;
+            public string config_filename;
+            public int plate_index;
+            public string ftp_file;
+            public string ftp_file_md5;
+            public string ams_mapping;
+            public string ams_mapping_info;
+            public string connection_type;
+            public string comments;
 
             /* access options */
-            string dev_ip;
-            string username;
-            string password;
+            public string dev_ip;
+            public string username;
+            public string password;
 
             /*user options */
-            bool task_bed_leveling;      /* bed leveling of task */
-            bool task_flow_cali;         /* flow calibration of task */
-            bool task_vibration_cali;    /* vibration calibration of task */
-            bool task_layer_inspect;     /* first layer inspection of task */
-            bool task_record_timelapse;  /* record timelapse of task */
-            bool task_use_ams;
+            public bool task_bed_leveling;      /* bed leveling of task */
+            public bool task_flow_cali;         /* flow calibration of task */
+            public bool task_vibration_cali;    /* vibration calibration of task */
+            public bool task_layer_inspect;     /* first layer inspection of task */
+            public bool task_record_timelapse;  /* record timelapse of task */
+            public bool task_use_ams;
         };
 
         public struct PublishParams
         {
-            string project_name;
-            string project_3mf_file;
-            string preset_name;
-            string project_model_id;
-            string design_id;
-            string config_filename;
+            public string project_name;
+            public string project_3mf_file;
+            public string preset_name;
+            public string project_model_id;
+            public string design_id;
+            public string config_filename;
         };
 
     }

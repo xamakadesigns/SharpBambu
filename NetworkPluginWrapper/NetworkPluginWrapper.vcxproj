@@ -223,6 +223,7 @@
     <Import Project="..\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets" Condition="Exists('..\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets')" />
     <Import Project="..\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets" Condition="Exists('..\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets')" />
     <Import Project="..\packages\boost-vc143.1.80.0\build\boost-vc143.targets" Condition="Exists('..\packages\boost-vc143.1.80.0\build\boost-vc143.targets')" />
+    <Import Project="..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets" Condition="Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -272,5 +273,6 @@
     <Error Condition="!Exists('..\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets'))" />
     <Error Condition="!Exists('..\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets'))" />
     <Error Condition="!Exists('..\packages\boost-vc143.1.80.0\build\boost-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost-vc143.1.80.0\build\boost-vc143.targets'))" />
+    <Error Condition="!Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets'))" />
   </Target>
 </Project>

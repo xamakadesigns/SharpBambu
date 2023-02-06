@@ -8,8 +8,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static SharpBambuTestApp.BambuStructs;
 
 namespace Test
 {
@@ -24,14 +26,13 @@ namespace Test
         //private OnLoginDelegate InstanceOnLoginDelegate;
         private OnUserLoginDelegate InstanceOnUserLoginDelegate;
         private OnSSDPMessageDelegate InstanceOnSSDPMessageDelegate;
-        private OnCancelDelegate InstanceOnCancelDelegate;
         private OnGetCountryCodeDelegate InstanceOnGetCountryCodeDelegate;
         private OnHttpErrorDelegate InstanceOnHttpErrorDelegate;
         private OnProgressUpdatedDelegate InstanceOnProgressUpdatedDelegate;
         private OnResultDelegate InstanceOnResultDelegate;
-        private OnUpdateStatusDelegate InstanceOnUpdateStatusDelegate;
-        private OnWasCanceledDelegate InstanceOnWasCanceledDelegate;
         private OnPrinterConnectedDelegate InstanceOnPrinterConnectedDelegate;
+        private WasCancelledDelegate InstanceWasCancelled_SendGcodeToSdCardDelegate;
+        private OnUpdateStatusDelegate InstanceOnUpdateStatus_SendGcodeToSdCardDelegate;
 
         public BambuPrinter Printer { get; private set; } = new BambuPrinter();
 
@@ -44,14 +45,13 @@ namespace Test
             InstanceOnLocalConnectedDelegate = OnLocalConnectEvent;
             InstanceOnUserLoginDelegate = OnUserLoginEvent;
             InstanceOnSSDPMessageDelegate = OnSsdpMessageEvent;
-            InstanceOnCancelDelegate = OnCancelEvent;
             InstanceOnGetCountryCodeDelegate = OnGetCountryCodeEvent;
             InstanceOnHttpErrorDelegate = OnHttpErrorEvent;
             InstanceOnProgressUpdatedDelegate = OnProgressUpdatedEvent;
             InstanceOnResultDelegate = OnResultEvent;
-            InstanceOnUpdateStatusDelegate = OnUpdateStatusEvent;
-            InstanceOnWasCanceledDelegate = OnWasCanceledEvent;
             InstanceOnPrinterConnectedDelegate = OnPrinterConnectedEvent;
+            InstanceWasCancelled_SendGcodeToSdCardDelegate = WasCancelled_SendGcodeToSdCardEvent;
+            InstanceOnUpdateStatus_SendGcodeToSdCardDelegate = OnUpdateStatus_SendGcodeToSdCardEvent;
         }
 
         /// <summary>
@@ -113,9 +113,11 @@ namespace Test
         private static extern int send_message([In, MarshalAs(UnmanagedType.LPStr)] StringBuilder deviceId, [In, MarshalAs(UnmanagedType.LPStr)] StringBuilder jsonMessage, int qos);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.I1)] 
         private static extern bool is_user_login();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.I1)] 
         private static extern bool is_server_connected();
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
@@ -192,17 +194,37 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
 
-        // __declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+        // https://stackoverflow.com/questions/15660722/why-are-cdecl-calls-often-mismatched-in-the-standard-p-invoke-convention
+        // https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170
+        // https://www.codeproject.com/Articles/1187064/Nightmare-on-Overwh-Elm-Street-The-bit-Calling-Con
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern BambuEnums.NetworkStatus start_send_gcode_to_sdcard(
+            [In, MarshalAs(UnmanagedType.LPStr)] string printParamsJson,
+            [MarshalAs(UnmanagedType.FunctionPtr)] OnUpdateStatusDelegate update_fn, 
+            [MarshalAs(UnmanagedType.FunctionPtr)] WasCancelledDelegate cancel_fn);
 
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
-        private static extern bool start_discovery(bool start, bool sending);
+        private static extern BambuEnums.NetworkStatus start_print(
+            [In, MarshalAs(UnmanagedType.LPStr)] string printParamsJson,
+            [MarshalAs(UnmanagedType.FunctionPtr)] OnUpdateStatusDelegate update_fn,
+            [MarshalAs(UnmanagedType.FunctionPtr)] WasCancelledDelegate cancel_fn);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern BambuEnums.NetworkStatus start_local_print(
+            [In, MarshalAs(UnmanagedType.LPStr)] string printParamsJson,
+            [MarshalAs(UnmanagedType.FunctionPtr)] OnUpdateStatusDelegate update_fn,
+            [MarshalAs(UnmanagedType.FunctionPtr)] WasCancelledDelegate cancel_fn);
+
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.I1)] 
+        private static extern bool start_discovery([MarshalAs(UnmanagedType.U1)] bool start, [MarshalAs(UnmanagedType.U1)] bool sending);
 
         // events
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnSSDPMessageDelegate([MarshalAs(UnmanagedType.BStr)] string dev_info_json);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnUserLoginDelegate(int onlineLogin, bool login);
+        private delegate void OnUserLoginDelegate(int onlineLogin, [MarshalAs(UnmanagedType.U1)] bool login);
         
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnPrinterConnectedDelegate([MarshalAs(UnmanagedType.BStr)] string topic);
@@ -229,16 +251,14 @@ namespace Test
         private delegate void OnGetCameraUrlDelegate([MarshalAs(UnmanagedType.BStr)] string url);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnUserLogin(int onlineLogin, bool login);
+        private delegate void OnUserLogin(int onlineLogin, [MarshalAs(UnmanagedType.U1)] bool login);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUpdateStatusDelegate(int status, int code, [MarshalAs(UnmanagedType.BStr)] string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate bool OnWasCanceledDelegate();
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate bool OnCancelDelegate();
+        [return: MarshalAs(UnmanagedType.I1)] 
+        private delegate bool WasCancelledDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnProgressUpdatedDelegate(int progress);
@@ -446,19 +466,6 @@ namespace Test
             Printer.CameraUrl = url;
         }
 
-        private bool OnWasCanceledEvent()
-        {
-            Console.WriteLine($"OnWasCanceledEvent");
-            throw new NotImplementedException();
-        }
-
-        private void OnUpdateStatusEvent(int status, int code, string message)
-        {
-            Console.WriteLine($"OnUpdateStatusEvent: status={status}, code={code}, message:");
-            Console.WriteLine(message);
-            throw new NotImplementedException();
-        }
-
         private void OnResultEvent(int retcode, string info)
         {
             Console.WriteLine($"OnResultEvent: onlineLogin={retcode}, login={info}");
@@ -468,12 +475,6 @@ namespace Test
         private void OnProgressUpdatedEvent(int progress)
         {
             Console.WriteLine($"OnProgressUpdatedEvent: progress={progress}");
-            throw new NotImplementedException();
-        }
-
-        private bool OnCancelEvent()
-        {
-            Console.WriteLine($"OnCancelEvent");
             throw new NotImplementedException();
         }
 
@@ -789,6 +790,75 @@ namespace Test
 
             if (result != 0)
                 throw new Exception($"Unable to refresh camera url, result: {result}");
+        }
+
+        public void SendGcodeToSdCard(string localGcodeFilePath, string destFileName, string deviceId, string ipAddress, string username, string password,
+            int plateIndex, string projectName, string taskName, string presetName, string configFileName,
+            string amsMapping, string amsMappingInfo, bool bedLeveling, bool flowCalibration, bool layerInspect, bool useAms, bool recordTimeLapse,
+            bool vibrationCalibration, string connectionType = "lan")
+        {
+            SelectedMachineDeviceId = deviceId;
+
+            if (!File.Exists(localGcodeFilePath))
+                throw new Exception($"SendGcodeToSdCard: File does not exist: {localGcodeFilePath}");
+
+            Console.WriteLine($"SendGcodeToSdCard: calculating MD5 on {localGcodeFilePath}");
+
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(localGcodeFilePath);
+            var localGcodeFileMd5Bytes = md5.ComputeHash(stream);
+            //var localGcodeFileMd5 = BitConverter.ToString(localGcodeFileMd5Bytes).Replace("-", "");
+            var localGcodeFileMd5 = Convert.ToBase64String(localGcodeFileMd5Bytes);
+
+
+
+            var printParams = new BambuStructs.PrintParams()
+            {
+                dev_id = deviceId,
+                dev_ip = ipAddress,
+                username = username,
+                password = password,
+                filename = localGcodeFilePath,
+                ftp_file = destFileName,
+                ftp_file_md5 = localGcodeFileMd5,
+                plate_index = plateIndex,
+                project_name = projectName,
+                task_name = taskName,
+                preset_name = presetName,
+                connection_type = connectionType,
+                config_filename = configFileName,
+                task_bed_leveling = bedLeveling,
+                task_flow_cali = flowCalibration,
+                task_layer_inspect = layerInspect,
+                task_use_ams = useAms,
+                task_record_timelapse = recordTimeLapse,
+                task_vibration_cali = vibrationCalibration,
+                ams_mapping = amsMapping,
+                ams_mapping_info = amsMappingInfo,
+                comments = ""
+            };
+
+            var printParamsJson = JsonConvert.SerializeObject(printParams);
+
+            Console.WriteLine(printParamsJson);
+
+            //var result = start_send_gcode_to_sdcard(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
+            //var result = start_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
+            var result = start_local_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
+
+            Console.WriteLine($"SendGcodeToSdCard: result={result}");            
+        }
+
+        private void OnUpdateStatus_SendGcodeToSdCardEvent(int status, int code, string message)
+        {
+            Console.WriteLine($"OnUpdateStatus_SendGcodeToSdCardEvent: status={status}, code={code}, message:");
+            Console.WriteLine(message);
+        }
+        private bool WasCancelled_SendGcodeToSdCardEvent()
+        {
+            Console.WriteLine($"WasCancelled_SendGcodeToSdCardEvent");
+
+            return false; // was cancelled
         }
 
         public void WipeNozzle()

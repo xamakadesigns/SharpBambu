@@ -130,14 +130,14 @@ namespace Slic3r {
         __declspec(dllexport) BSTR get_bambulab_host();
         __declspec(dllexport) BSTR get_user_selected_machine();
         __declspec(dllexport) int set_user_selected_machine(char* dev_id);
-        __declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn);
-        __declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn);
-        __declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn);
-        __declspec(dllexport) int start_local_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn);
+        __declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn);
+        __declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn);
+        __declspec(dllexport) int start_send_gcode_to_sdcard(char* params_json, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn);
+        __declspec(dllexport) int start_local_print(char* params_json, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn);
         __declspec(dllexport) int get_user_presets(std::map<std::string, std::map<std::string, std::string>>* user_presets);
         __declspec(dllexport) BSTR request_setting_id(std::string name, std::map<std::string, std::string>* values_map, unsigned int* http_code);
         __declspec(dllexport) int put_setting(std::string setting_id, std::string name, std::map<std::string, std::string>* values_map, unsigned int* http_code);
-        __declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressFn pro_fn = nullptr, WasCancelledFn cancel_fn = nullptr);
+        __declspec(dllexport) int get_setting_list(std::string bundle_version, ProgressFn pro_fn = nullptr, WasCancelledFnCS cancel_fn = nullptr);
         __declspec(dllexport) int delete_setting(char* setting_id);
         __declspec(dllexport) BSTR get_studio_info_url();
         __declspec(dllexport) int set_extra_http_header(std::map<std::string, std::string> extra_headers);
@@ -151,7 +151,7 @@ namespace Slic3r {
         __declspec(dllexport) int modify_printer_name(char* dev_id, char* dev_name);
         __declspec(dllexport) void set_get_camera_url_callback(OnGetCameraUrlCS callback);
         __declspec(dllexport) int get_camera_url(char* dev_id);
-        __declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn, std::string* out);
+        __declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFnCS update_fn, WasCancelledFnCS cancel_fn, std::string* out);
 
 
 

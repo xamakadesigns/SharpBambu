@@ -23,6 +23,9 @@ namespace SharpBambuTestApp
             IpAddress = config["network:ipAddress"] ?? "";
             DeviceId = config["network:deviceId"] ?? "";
 
+            var result = bool.TryParse(config["network:autoUpdateDll"], out bool autoUpdateDll);
+            AutoUpdateDll = autoUpdateDll;
+
             if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password) || string.IsNullOrEmpty(IpAddress))
                 throw new Exception("Please create a copy of 'appsttings.json' and name it 'appsettings.secret.json'. " +
                     "Enter the IP & password for your printer from the Lan mode screen.");
@@ -34,5 +37,6 @@ namespace SharpBambuTestApp
         public string Password { get; private set; } = "";
         public string IpAddress { get; private set; } = "";
         public string DeviceId { get; private set; } = "";
+        public bool AutoUpdateDll { get; private set; }
     }
 }
