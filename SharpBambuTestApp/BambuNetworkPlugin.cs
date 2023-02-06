@@ -192,6 +192,8 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
 
+        // __declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern bool start_discovery(bool start, bool sending);
 

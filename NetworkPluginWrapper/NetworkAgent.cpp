@@ -828,11 +828,24 @@ __declspec(dllexport) BSTR build_login_info()
     return ::_com_util::ConvertStringToBSTR(ret.c_str());
 }
 
-__declspec(dllexport) int bind(char* dev_ip, char* timezone, OnUpdateStatusFn update_fn)
+
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_bind = nullptr;
+
+void OnMsgArrivedFnWrapper_bind(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_bind != nullptr)
+        OnUpdateStatusFnCS_ptr_bind(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int bind(char* dev_ip, char* timezone, OnUpdateStatusFnCS update_fn)
+{
+    OnUpdateStatusFnCS_ptr_bind = update_fn;
+
     int ret = 0;
     if (network_agent && bind_ptr) {
-        ret = bind_ptr(network_agent, dev_ip, timezone, update_fn);
+        ret = bind_ptr(network_agent, dev_ip, timezone, OnMsgArrivedFnWrapper_bind);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%, dev_ip=%3%, timezone=%4%")
                 %network_agent %ret %dev_ip %timezone;
@@ -880,44 +893,92 @@ __declspec(dllexport) int set_user_selected_machine(char* dev_id)
     return ret;
 }
 
-__declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_start_print = nullptr;
+
+void OnMsgArrivedFnWrapper_start_print(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_start_print != nullptr)
+        OnUpdateStatusFnCS_ptr_start_print(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int start_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+{
+    OnUpdateStatusFnCS_ptr_start_print = update_fn;
+
     int ret = 0;
     if (network_agent && start_print_ptr) {
-        ret = start_print_ptr(network_agent, params, update_fn, cancel_fn);
+        ret = start_print_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_print, cancel_fn);
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
                 %network_agent %ret %params.dev_id %params.task_name %params.project_name;
     }
     return ret;
 }
 
-__declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_start_print_with_record = nullptr;
+
+void OnMsgArrivedFnWrapper_start_print_with_record(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_start_print_with_record != nullptr)
+        OnUpdateStatusFnCS_ptr_start_print_with_record(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int start_local_print_with_record(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+{
+    OnUpdateStatusFnCS_ptr_start_print_with_record = update_fn;
+
     int ret = 0;
     if (network_agent && start_local_print_with_record_ptr) {
-        ret = start_local_print_with_record_ptr(network_agent, params, update_fn, cancel_fn);
+        ret = start_local_print_with_record_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_print_with_record, cancel_fn);
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
                 %network_agent %ret %params.dev_id %params.task_name %params.project_name;
     }
     return ret;
 }
 
-__declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard = nullptr;
+
+void OnMsgArrivedFnWrapper_send_gcode_to_sdcard(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard != nullptr)
+        OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int start_send_gcode_to_sdcard(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+{
+    OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard = update_fn;
+
 	int ret = 0;
 	if (network_agent && start_send_gcode_to_sdcard_ptr) {
-		ret = start_send_gcode_to_sdcard_ptr(network_agent, params, update_fn, cancel_fn);
+		ret = start_send_gcode_to_sdcard_ptr(network_agent, params, OnMsgArrivedFnWrapper_send_gcode_to_sdcard, cancel_fn);
 		BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
 			% network_agent % ret % params.dev_id % params.task_name % params.project_name;
 	}
 	return ret;
 }
 
-__declspec(dllexport) int start_local_print(PrintParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn)
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_start_local_print = nullptr;
+
+void OnMsgArrivedFnWrapper_start_local_print(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_start_local_print != nullptr)
+        OnUpdateStatusFnCS_ptr_start_local_print(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int start_local_print(PrintParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn)
+{
+    OnUpdateStatusFnCS_ptr_start_local_print = update_fn;
+
     int ret = 0;
     if (network_agent && start_local_print_ptr) {
-        ret = start_local_print_ptr(network_agent, params, update_fn, cancel_fn);
+        ret = start_local_print_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_local_print, cancel_fn);
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
                 %network_agent %ret %params.dev_id %params.task_name %params.project_name;
     }
@@ -1110,11 +1171,24 @@ __declspec(dllexport) int get_camera_url(char* dev_id)
     return ret;
 }
 
-__declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFn update_fn, WasCancelledFn cancel_fn, std::string *out)
+
+OnUpdateStatusFnCS OnUpdateStatusFnCS_ptr_start_publish = nullptr;
+
+void OnMsgArrivedFnWrapper_start_publish(int status, int code, std::string msg)
 {
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnUpdateStatusFnCS_ptr_start_publish != nullptr)
+        OnUpdateStatusFnCS_ptr_start_publish(status, code, msg_bstr);
+}
+
+__declspec(dllexport) int start_publish(PublishParams params, OnUpdateStatusFnCS update_fn, WasCancelledFn cancel_fn, std::string *out)
+{
+    OnUpdateStatusFnCS_ptr_start_publish = update_fn;
+
     int ret = 0;
     if (network_agent && start_publish_ptr) {
-        ret = start_publish_ptr(network_agent, params, update_fn, cancel_fn, out);
+        ret = start_publish_ptr(network_agent, params, OnMsgArrivedFnWrapper_start_publish, cancel_fn, out);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%") % network_agent % ret;
     }
