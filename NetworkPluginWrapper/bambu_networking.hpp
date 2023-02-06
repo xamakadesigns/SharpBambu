@@ -67,6 +67,7 @@ namespace BBL {
     // OnPrinterConnectedFn
     // OnLocalConnectedFn
 typedef void (*OnServerConnectedFnCS)(void);
+typedef void (*OnLocalConnectedFnCS)(int status, BSTR dev_id, BSTR msg);
 typedef void (*OnMessageFnCS)(BSTR dev_id, BSTR msg);
 typedef void (*OnGetCameraUrlCS)(BSTR cameraUrl);
 // OnMessageFn

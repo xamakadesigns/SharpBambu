@@ -543,11 +543,25 @@ __declspec(dllexport) int set_on_message_fn(OnMessageFnCS fn)
     return ret;
 }
 
-__declspec(dllexport) int set_on_local_connect_fn(OnLocalConnectedFn fn)
+
+OnLocalConnectedFnCS OnLocalConnectedFnCS_ptr = nullptr;
+
+void OnLocalConnectedFnWrapper(int status, std::string dev_id, std::string msg)
 {
+    BSTR dev_id_bstr = ::_com_util::ConvertStringToBSTR(dev_id.c_str());
+    BSTR msg_bstr = ::_com_util::ConvertStringToBSTR(msg.c_str());
+
+    if (OnLocalConnectedFnCS_ptr != nullptr)
+        OnLocalConnectedFnCS_ptr(status, dev_id_bstr, msg_bstr);
+}
+
+__declspec(dllexport) int set_on_local_connect_fn(OnLocalConnectedFnCS fn)
+{
+    OnLocalConnectedFnCS_ptr = fn;
+
     int ret = 0;
     if (network_agent && set_on_local_connect_fn_ptr) {
-        ret = set_on_local_connect_fn_ptr(network_agent, fn);
+        ret = set_on_local_connect_fn_ptr(network_agent, OnLocalConnectedFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }

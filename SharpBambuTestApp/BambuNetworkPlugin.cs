@@ -220,7 +220,7 @@ namespace Test
         private delegate string OnGetCountryCodeDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnLocalConnectedDelegate(int status, [MarshalAs(UnmanagedType.BStr)] string deviceId, [MarshalAs(UnmanagedType.BStr)] string message);
+        private delegate void OnLocalConnectedDelegate(BambuEnums.ConnectStatus status, [MarshalAs(UnmanagedType.BStr)] string deviceId, [MarshalAs(UnmanagedType.BStr)] string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnGetCameraUrlDelegate([MarshalAs(UnmanagedType.BStr)] string url);
@@ -404,10 +404,12 @@ namespace Test
             throw new NotImplementedException();
         }
 
-        private void OnLocalConnectEvent(int status, string deviceId, string message)
+        private void OnLocalConnectEvent(BambuEnums.ConnectStatus status, string deviceId, string message)
         {
             Console.WriteLine($"OnLocalConnectEvent: Printer {deviceId} is locally connected with status {status}; message:");
             Console.WriteLine(message);
+
+            ConnectionStatus = status;
         }
 
         private void OnUserLoginEvent(int onlineLogin, bool login)
@@ -669,6 +671,8 @@ namespace Test
 
         public bool LanMode { get; private set; } = false;
         public int GcodeSequenceNumber { get; private set; } = 20000;
+        public BambuEnums.ConnectStatus ConnectionStatus { get; private set; }
+
         public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
         {
             if (string.IsNullOrEmpty(SelectedMachineDeviceId))
