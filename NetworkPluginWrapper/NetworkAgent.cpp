@@ -466,11 +466,25 @@ __declspec(dllexport) int set_on_user_login_fn(OnUserLoginFn fn)
     return ret;
 }
 
-__declspec(dllexport) int set_on_printer_connected_fn(OnPrinterConnectedFn fn)
+
+OnPrinterConnectedFnCS OnPrinterConnectedFnCS_ptr = nullptr;
+
+void OnPrinterConnectedFnWrapper(std::string topic_str)
 {
+    BSTR topic_str_bstr = ::_com_util::ConvertStringToBSTR(topic_str.c_str());
+
+    if (OnPrinterConnectedFnCS_ptr != nullptr)
+        OnPrinterConnectedFnCS_ptr(topic_str_bstr);
+}
+
+
+__declspec(dllexport) int set_on_printer_connected_fn(OnPrinterConnectedFnCS fn)
+{
+    OnPrinterConnectedFnCS_ptr = fn;
+
     int ret = 0;
     if (network_agent && set_on_printer_connected_fn_ptr) {
-        ret = set_on_printer_connected_fn_ptr(network_agent, fn);
+        ret = set_on_printer_connected_fn_ptr(network_agent, OnPrinterConnectedFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }
