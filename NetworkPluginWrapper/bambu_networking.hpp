@@ -71,6 +71,7 @@ typedef void (*OnLocalConnectedFnCS)(int status, BSTR dev_id, BSTR msg);
 typedef void (*OnMessageFnCS)(BSTR dev_id, BSTR msg);
 typedef void (*OnGetCameraUrlCS)(BSTR cameraUrl);
 typedef void (*OnPrinterConnectedFnCS)(BSTR topic_str);
+typedef void (*OnMsgArrivedFnCS)(BSTR dev_info_json_str);
 // OnMessageFn
 // OnHttpErrorFn
 // GetCountryCodeFn

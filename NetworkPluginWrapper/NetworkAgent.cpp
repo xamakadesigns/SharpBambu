@@ -443,11 +443,24 @@ __declspec(dllexport) int start()
     return ret;
 }
 
-__declspec(dllexport) int set_on_ssdp_msg_fn(OnMsgArrivedFn fn)
+OnMsgArrivedFnCS OnMsgArrivedFnCS_ptr = nullptr;
+
+void OnMsgArrivedFnWrapper(std::string dev_info_json_str)
 {
+    // sddp message (sent as an SSDP UDP packet, comes out of the DLL as json)
+    BSTR dev_info_json_str_bstr = ::_com_util::ConvertStringToBSTR(dev_info_json_str.c_str());
+
+    if (OnMsgArrivedFnCS_ptr != nullptr)
+        OnMsgArrivedFnCS_ptr(dev_info_json_str_bstr);
+}
+
+__declspec(dllexport) int set_on_ssdp_msg_fn(OnMsgArrivedFnCS fn)
+{
+    OnMsgArrivedFnCS_ptr = fn;
+
     int ret = 0;
     if (network_agent && set_on_ssdp_msg_fn_ptr) {
-        ret = set_on_ssdp_msg_fn_ptr(network_agent, fn);
+        ret = set_on_ssdp_msg_fn_ptr(network_agent, OnMsgArrivedFnWrapper);
         if (ret)
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(" error: network_agent=%1%, ret=%2%")%network_agent %ret;
     }

@@ -23,7 +23,12 @@ networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
 networkPlugin.Subscribe();
-//networkPlugin.ConnectServer();
+networkPlugin.ConnectServer();
+
+// kinda pointless but it works
+//networkPlugin.StartSSDPDiscovery();
+//networkPlugin.StopSSDPDiscovery();
+
 networkPlugin.ConnectPrinter(config.DeviceId, config.IpAddress, config.Username, config.Password);
 
 try

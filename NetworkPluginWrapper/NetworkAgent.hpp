@@ -96,7 +96,7 @@ namespace Slic3r {
         __declspec(dllexport) int set_cert_file(char* folder, char *filename);
         __declspec(dllexport) int set_country_code(char* country_code);
         __declspec(dllexport) int start();
-        __declspec(dllexport) int set_on_ssdp_msg_fn(OnMsgArrivedFn fn);
+        __declspec(dllexport) int set_on_ssdp_msg_fn(OnMsgArrivedFnCS fn);
         __declspec(dllexport) int set_on_user_login_fn(OnUserLoginFn fn);
         __declspec(dllexport) int set_on_printer_connected_fn(OnPrinterConnectedFnCS fn);
         __declspec(dllexport) int set_on_server_connected_fn(OnServerConnectedFnCS fn);

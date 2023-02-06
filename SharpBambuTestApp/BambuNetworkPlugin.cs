@@ -192,11 +192,12 @@ namespace Test
         [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
         private static extern int user_logout();
 
-
+        [DllImport("NetworkPluginWrapper.dll", CharSet = CharSet.Ansi)]
+        private static extern bool start_discovery(bool start, bool sending);
 
         // events
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        private delegate void OnSSDPMessageDelegate([MarshalAs(UnmanagedType.BStr)] string topic);
+        private delegate void OnSSDPMessageDelegate([MarshalAs(UnmanagedType.BStr)] string dev_info_json);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate void OnUserLoginDelegate(int onlineLogin, bool login);
@@ -354,10 +355,28 @@ namespace Test
             set_get_camera_url_callback(InstanceOnGetCameraUrlDelegate);
         }
 
-        private void OnSsdpMessageEvent(string topic)
+        public void StartSSDPDiscovery()
         {
-            Console.WriteLine($"OnSsdpMessageEvent: topic={topic}");
-            throw new NotImplementedException();
+            Console.WriteLine("Starting SSDP discovery on UDP port 2021");
+
+            var result = start_discovery(true, false);
+
+            if (!result)
+                throw new Exception("Unable to start SSDP discovery");
+        }
+        public void StopSSDPDiscovery()
+        {
+            Console.WriteLine("Stopping SSDP discovery on UDP port 2021");
+
+            var result = start_discovery(false, false);
+
+            if (!result)
+                throw new Exception("Unable to stop SSDP discovery");
+        }
+
+        private void OnSsdpMessageEvent(string dev_info_json)
+        {
+            //Console.WriteLine($"OnSsdpMessageEvent: topic={dev_info_json}");
         }
 
         private void OnPrinterConnectedEvent(string topic)
