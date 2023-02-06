@@ -142,6 +142,7 @@ enum ConnectStatus {
     ConnectStatusLost = 2,
 };
 
+
 /* print job*/
 struct PrintParams {
     /* basic info */
@@ -158,9 +159,12 @@ struct PrintParams {
     std::string     ams_mapping_info;
     std::string     connection_type;
     std::string     comments;
+    int             origin_profile_id = 0;
+    std::string     origin_model_id;
 
     /* access options */
     std::string     dev_ip;
+    bool            use_ssl;
     std::string     username;
     std::string     password;
 
