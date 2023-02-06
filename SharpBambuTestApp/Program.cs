@@ -24,7 +24,7 @@ networkPlugin.SetCountryCode("US"); // todo dont hard code this
 networkPlugin.Start();
 networkPlugin.Subscribe();
 //networkPlugin.ConnectServer();
-networkPlugin.ConnectPrinter(networkPlugin.SelectedMachineDeviceId, config.IpAddress, config.Username, config.Password);
+networkPlugin.ConnectPrinter(config.DeviceId, config.IpAddress, config.Username, config.Password);
 
 try
 {

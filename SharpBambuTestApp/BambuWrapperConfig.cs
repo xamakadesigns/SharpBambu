@@ -21,6 +21,7 @@ namespace SharpBambuTestApp
             Username = config["network:username"] ?? "";
             Password = config["network:password"] ?? "";
             IpAddress = config["network:ipAddress"] ?? "";
+            DeviceId = config["network:deviceId"] ?? "";
 
             if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password) || string.IsNullOrEmpty(IpAddress))
                 throw new Exception("Please create a copy of 'appsttings.json' and name it 'appsettings.secret.json'. " +
@@ -32,5 +33,6 @@ namespace SharpBambuTestApp
         public string Username { get; private set; } = "";
         public string Password { get; private set; } = "";
         public string IpAddress { get; private set; } = "";
+        public string DeviceId { get; private set; } = "";
     }
 }

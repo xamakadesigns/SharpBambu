@@ -545,6 +545,10 @@ namespace Test
         public void ConnectPrinter(string deviceId, string ipAddress, string username, string password)
         {
             LanMode = true;
+
+            // if the printer is not presently bound in your account, this may still work:
+            SelectedMachineDeviceId = deviceId;
+
             Console.WriteLine($"Connecting to printer {deviceId} at {ipAddress}");
 
             var result = connect_printer(new StringBuilder(deviceId), new StringBuilder(ipAddress), new StringBuilder(username), new StringBuilder(password));
@@ -647,15 +651,19 @@ namespace Test
 
         public bool IsServerConnected => is_server_connected();
 
+        private string? _selectedMachineDeviceID;
+
         public string SelectedMachineDeviceId
         {
-            get => get_user_selected_machine();
+            get => _selectedMachineDeviceID ?? get_user_selected_machine();
             set
             {
                 var result = set_user_selected_machine(new StringBuilder(value));
 
                 if (result != 0)
                     throw new Exception($"Unable to set selected machine, result: {result}");
+
+                _selectedMachineDeviceID = value;
             }
         }
 
