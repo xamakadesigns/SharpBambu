@@ -835,16 +835,22 @@ namespace Test
                 task_vibration_cali = vibrationCalibration,
                 ams_mapping = amsMapping,
                 ams_mapping_info = amsMappingInfo,
-                comments = ""
+                comments = "",
+                use_ssl = LanMode ? false : true,
+                origin_model_id = "", // tbd
+                origin_profile_id = 1 // tbd
             };
 
-            var printParamsJson = JsonConvert.SerializeObject(printParams);
+            var printParamsJson = JsonConvert.SerializeObject(printParams, new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+            });
 
             Console.WriteLine(printParamsJson);
 
-            //var result = start_send_gcode_to_sdcard(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
+            var result = start_send_gcode_to_sdcard(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
             //var result = start_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
-            var result = start_local_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
+            //var result = start_local_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
 
             Console.WriteLine($"SendGcodeToSdCard: result={result}");            
         }

@@ -22,7 +22,7 @@ networkPlugin.InitCallbacks();
 networkPlugin.SetCountryCode("US"); // todo dont hard code this
 
 networkPlugin.Start();
-networkPlugin.Subscribe();
+//networkPlugin.Subscribe();
 networkPlugin.ConnectServer();
 
 // kinda pointless but it works
@@ -74,10 +74,14 @@ try
 
             case "sendtest":
                 Console.WriteLine("Testing send gcode");
-                File.WriteAllText("c:\\temp\\test.gcode", "G28");
+                File.WriteAllText("c:\\temp\\test.gcode", "G28\n");
 
-                //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project name", "task name", "preset name", "config file name", "", "", false, false, false, false, false, false, "lan");
-                networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test1234.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 1, "project_name", "", "Generic PETG", "", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
+            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project name", "task name", "preset name", "config file name", "", "", false, false, false, false, false, false, "lan");
+            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
+            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test1234.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name", "", "", "", "", "", false, false, false, false, false, false, "lan");
+
+            networkPlugin.SendGcodeToSdCard("f:\\temp2\\nut.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "nut2.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
+            
 
                 break;
 

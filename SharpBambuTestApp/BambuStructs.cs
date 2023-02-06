@@ -26,9 +26,13 @@ namespace SharpBambuTestApp
             public string ams_mapping_info;
             public string connection_type;
             public string comments;
+            public int origin_profile_id = 0;
+            public string origin_model_id;
 
             /* access options */
             public string dev_ip;
+            public bool use_ssl;
+
             public string username;
             public string password;
 
@@ -39,8 +43,7 @@ namespace SharpBambuTestApp
             public bool task_layer_inspect;     /* first layer inspection of task */
             public bool task_record_timelapse;  /* record timelapse of task */
             public bool task_use_ams;
-        };
-
+        }
         public struct PublishParams
         {
             public string project_name;

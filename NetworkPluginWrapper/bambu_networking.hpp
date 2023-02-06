@@ -159,8 +159,8 @@ struct PrintParams {
     std::string     ams_mapping_info;
     std::string     connection_type;
     std::string     comments;
-    int             origin_profile_id = 0;
-    std::string     origin_model_id;
+    //int             origin_profile_id = 0;
+    //std::string     origin_model_id;
 
     /* access options */
     std::string     dev_ip;
@@ -187,11 +187,15 @@ void to_json(json& j, const PrintParams& p) {
         {"config_filename", p.config_filename},
         {"plate_index", p.plate_index},
         {"ftp_file", p.ftp_file},
+        {"ftp_file_md5", p.ftp_file_md5},
         {"ams_mapping", p.ams_mapping},
         {"ams_mapping_info", p.ams_mapping_info},
         {"connection_type", p.connection_type},
         {"comments", p.comments},
+        //{"origin_profile_id", p.origin_profile_id},
+        //{"origin_model_id", p.origin_model_id},
         {"dev_ip", p.dev_ip},
+        {"use_ssl", p.use_ssl},
         {"username", p.username},
         {"password", p.password},
         {"task_bed_leveling", p.task_bed_leveling},
@@ -212,10 +216,14 @@ void from_json(const json& j, PrintParams& p) {
     j.at("config_filename").get_to(p.config_filename);
     j.at("plate_index").get_to(p.plate_index);
     j.at("ftp_file").get_to(p.ftp_file);
+    j.at("ftp_file_md5").get_to(p.ftp_file_md5);
     j.at("ams_mapping").get_to(p.ams_mapping);
     j.at("connection_type").get_to(p.connection_type);
     j.at("comments").get_to(p.comments);
+    //j.at("origin_profile_id").get_to(p.origin_profile_id);
+    //j.at("origin_model_id").get_to(p.origin_model_id);
     j.at("dev_ip").get_to(p.dev_ip);
+    j.at("use_ssl").get_to(p.use_ssl);
     j.at("username").get_to(p.username);
     j.at("password").get_to(p.password);
     j.at("task_bed_leveling").get_to(p.task_bed_leveling);
