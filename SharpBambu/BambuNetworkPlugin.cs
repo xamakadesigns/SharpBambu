@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using SharpBambu;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace SharpBambu
 {
     public class BambuNetworkPlugin : IDisposable
     {
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<BambuNetworkPlugin>();
+
         // Callback functions need to be scoped here
         private OnServerConnectedDelegate InstanceOnServerConnectedDelegate;
         private OnPrinterMessageDelegate InstanceOnCloudMessageDelegate;
@@ -304,37 +307,39 @@ namespace SharpBambu
         /// <summary>
         /// Create an instance of the Bambu Network Plugin; requires a local copy of bambu_networking.dll
         /// </summary>
-        /// <param name="autoUpdateDll">Copy the bambu_networking.dll from Bambu Studio folder when true</param>
+        /// <param name="copyNetworkingDllFromBambuStudio">Copy the bambu_networking.dll from Bambu Studio folder when true</param>
         /// <exception cref="FileNotFoundException">Thrown when bambu_networking.dll is missing</exception>
         /// <exception cref="Exception">Thrown when NetworkPluginWrapper.dll fails to initialize</exception>
-        public void InitializeNetworkPlugin(bool autoUpdateDll = true)
+        public void InitializeNetworkPlugin(bool copyNetworkingDllFromBambuStudio = true)
         {
-            ResolveBambuNetworkingDll(autoUpdateDll);
+            ResolveBambuNetworkingDll(copyNetworkingDllFromBambuStudio);
 
-            Console.WriteLine($"Setting data dir to {BambuStudioDataFolder}");
+            Log.Information("Setting data dir to {BambuStudioDataFolder}", BambuStudioDataFolder);
             set_data_dir(new StringBuilder(BambuStudioDataFolder));
 
-            Console.WriteLine($"Setting dll dir to {BambuStudioPluginFolder}");
+            Log.Information("Setting dll dir to {BambuStudioPluginFolder}", BambuStudioPluginFolder);
             set_dll_dir(new StringBuilder(BambuStudioPluginFolder));
 
-            Console.WriteLine("Initialize network agent wrapper dll");
+            Log.Information("Initialize network agent wrapper dll");
             var result = initialize_network_module();
 
             if (result != 0)
                 throw new Exception("Bambu Network Plugin wrapper DLL failed to initialize");
 
-            Console.WriteLine("Creating network agent");
+            Log.Information("Creating network agent");
             Agent = bambu_network_create_agent();
 
             if (Agent == UIntPtr.Zero)
                 throw new Exception("Bambu Network Plugin failed to initialize");
+
+            Log.Information("Version {Version}", NetworkPluginVersion);
         }
 
         public void InitCallbacks()
         {
             var result = 0;
 
-            Console.WriteLine("Setting up callbacks");
+            Log.Debug("Setting up callbacks");
 
             result = set_on_user_login_fn(InstanceOnUserLoginDelegate);
             if (result != 0)
@@ -378,7 +383,7 @@ namespace SharpBambu
 
         public void StartSSDPDiscovery()
         {
-            Console.WriteLine("Starting SSDP discovery on UDP port 2021");
+            Log.Information("Starting SSDP discovery on UDP port 2021");
 
             var result = start_discovery(true, false);
 
@@ -387,7 +392,7 @@ namespace SharpBambu
         }
         public void StopSSDPDiscovery()
         {
-            Console.WriteLine("Stopping SSDP discovery on UDP port 2021");
+            Log.Information("Stopping SSDP discovery on UDP port 2021");
 
             var result = start_discovery(false, false);
 
@@ -397,23 +402,23 @@ namespace SharpBambu
 
         private void OnSsdpMessageEvent(string dev_info_json)
         {
-            //Console.WriteLine($"OnSsdpMessageEvent: topic={dev_info_json}");
+            Log.Verbose("SSDP message, topic={dev_info_json}", dev_info_json);
         }
 
         private void OnPrinterConnectedEvent(string topic)
         {
-            Console.WriteLine($"OnPrinterConnectedEvent: topic={topic}");
+            Log.Information("Printer connected, topic={topic}", topic);
         }
 
         private string OnGetCountryCodeEvent()
         {
-            Console.WriteLine("OnGetCountryCodeEvent");
+            Log.Debug("Get Country Code");
             throw new NotImplementedException();
         }
 
         private void OnServerConnectedEvent()
         {
-            Console.WriteLine("OnServerConnectedEvent");
+            Log.Information("Server connected");
         }
 
         private void OnCloudMessageEvent(string deviceId, string jsonMessage)
@@ -440,55 +445,55 @@ namespace SharpBambu
         
         private void OnHttpErrorEvent(uint httpStatusCode, string httpBody)
         {
-            Console.WriteLine($"OnHttpErrorEvent: httpStatusCode={httpStatusCode}, string={httpBody}");
+            Log.Error("Http Error httpStatusCode={httpStatusCode}, string={httpBody}", httpStatusCode, httpBody);
             throw new NotImplementedException();
         }
 
         private void OnLocalConnectEvent(BambuEnums.ConnectStatus status, string deviceId, string message)
         {
-            Console.WriteLine($"OnLocalConnectEvent: Printer {deviceId} is locally connected with status {status}; message:");
-            Console.WriteLine(message);
+            Log.Information("Printer {deviceId} connected locally with status {status}", deviceId, status);
+            Log.Debug("Message: {message}", message);
 
             ConnectionStatus = status;
         }
 
         private void OnUserLoginEvent(int onlineLogin, bool login)
         {
-            Console.WriteLine($"OnUserLoginEvent: onlineLogin={onlineLogin}, login={login}");
+            Log.Information("User login onlineLogin={onlineLogin}, login={login}", onlineLogin, login);
             throw new NotImplementedException();
         }
 
         private void OnGetCameraUrlEvent(string url)
         {
-            Console.WriteLine($"OnGetCameraUrlEvent: Camera URL={url}");
+            Log.Debug("Camera URL response, URL={url}", url);
 
             Printer.CameraUrl = url;
         }
 
         private void OnResultEvent(int retcode, string info)
         {
-            Console.WriteLine($"OnResultEvent: onlineLogin={retcode}, login={info}");
+            Log.Debug("Result returned, retcode={retcode}, info={info}", retcode, info);
             throw new NotImplementedException();
         }
 
         private void OnProgressUpdatedEvent(int progress)
         {
-            Console.WriteLine($"OnProgressUpdatedEvent: progress={progress}");
+            Log.Debug("Progress update, progress={progress}", progress);
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Check for (and update) the local copy of bambu_networking.dll
         /// </summary>
-        /// <param name="autoUpdateDll">Copy the bambu_networking.dll from Bambu Studio folder when true</param>
+        /// <param name="copyNetworkingDllFromBambuStudio">Copy the bambu_networking.dll from Bambu Studio folder when true</param>
         /// <exception cref="FileNotFoundException">Thrown when bambu_networking.dll is missing</exception>
-        private void ResolveBambuNetworkingDll(bool autoUpdateDll)
+        private void ResolveBambuNetworkingDll(bool copyNetworkingDllFromBambuStudio)
         {
-            Console.WriteLine("Resolving bambu_networking.dll");
+            Log.Debug("Resolving bambu_networking.dll, looking in path {Path}", ApplicationFolder + "\\bambu_networking.dll");
 
             var dllDestinationPath = ApplicationFolder + "\\bambu_networking.dll";
 
-            if (autoUpdateDll && File.Exists(BambuStudioPluginFolder + "\\bambu_networking.dll"))
+            if (copyNetworkingDllFromBambuStudio && File.Exists(BambuStudioPluginFolder + "\\bambu_networking.dll"))
             {
                 try
                 {
@@ -517,8 +522,6 @@ namespace SharpBambu
         /// <exception cref="Exception">Thrown when bambu_networking.dll is unable to set config folder path to the desired location</exception>
         public void SetConfigFolder(string folderPath = "")
         {
-            Console.WriteLine("Setting config folder");
-
             if (string.IsNullOrEmpty(folderPath))
             {
                 folderPath = BambuNetworkPluginConfigFolder;
@@ -527,6 +530,8 @@ namespace SharpBambu
             {
                 BambuNetworkPluginConfigFolder = folderPath;
             }
+
+            Log.Debug("Setting config folder to {folderPath}", folderPath);
 
             var result = set_config_dir(new StringBuilder(folderPath));
 
@@ -547,7 +552,7 @@ namespace SharpBambu
         /// </summary>
         public void InitializeNetworkAgentLog()
         {
-            Console.WriteLine("Initializing Bambu Network Plugin log");
+            Log.Information("Initializing Bambu Network Plugin log, should be at location {BambuNetworkPluginLogFolder}", BambuNetworkPluginLogFolder);
 
             var result = init_log();
             if (result != 0)
@@ -557,7 +562,7 @@ namespace SharpBambu
         public void ConnectServer()
         {
             LanMode = false;
-            Console.WriteLine("Connecting to Bambu server");
+            Log.Information("Connecting to Bambu Cloud");
 
             var result = connect_server();
 
@@ -572,7 +577,7 @@ namespace SharpBambu
             // if the printer is not presently bound in your account, this may still work:
             SelectedMachineDeviceId = deviceId;
 
-            Console.WriteLine($"Connecting to printer {deviceId} at {ipAddress}");
+            Log.Information("Connecting to printer {deviceId} at {ipAddress} in Lan mode", deviceId, ipAddress);
 
             var result = connect_printer(new StringBuilder(deviceId), new StringBuilder(ipAddress), new StringBuilder(username), new StringBuilder(password));
 
@@ -582,7 +587,7 @@ namespace SharpBambu
 
         public void DisconnectPrinter()
         {
-            Console.WriteLine("Disconnecting printer");
+            Log.Information("Disconnecting from printer");
 
             var result = disconnect_printer();
 
@@ -592,7 +597,7 @@ namespace SharpBambu
 
         public void UserLogout()
         {
-            Console.WriteLine("User logout");
+            Log.Information("Logging out");
 
             var result = user_logout();
 
@@ -610,21 +615,21 @@ namespace SharpBambu
 
         public string BuildLoginCmd()
         {
-            Console.WriteLine("Build login cmd");
+            Log.Debug("Build login cmd");
 
             return build_login_cmd();
         }
 
         public string BuildLogoutCmd()
         {
-            Console.WriteLine("Build logout cmd");
+            Log.Debug("Build logout cmd");
 
             return build_logout_cmd();
         }
 
         public string BuildLoginInfo()
         {
-            Console.WriteLine("Build login info");
+            Log.Debug("Build login info");
 
             return build_login_info();
         }
@@ -636,7 +641,7 @@ namespace SharpBambu
         /// </summary>
         public void Dispose()
         {
-            Console.WriteLine("Dispose and deallocate Bambu Network Plugin");
+            Log.Debug("Dispose and deallocate Bambu Network Plugin");
 
             if (Agent != UIntPtr.Zero)
             {
@@ -647,12 +652,13 @@ namespace SharpBambu
 
         public void Start()
         {
+            Log.Information("Starting Bambu Networking");
             start();
         }
 
         public void SetCertFile(string certFolder, string certFilename)
         {
-            Console.WriteLine($"Set cert file {certFolder}\\{certFilename}");
+            Log.Debug("Set cert file {certFolder}\\{certFilename}", certFolder, certFilename);
 
             var result = set_cert_file(new StringBuilder(certFolder), new StringBuilder(certFilename));
 
@@ -662,7 +668,7 @@ namespace SharpBambu
 
         public void SetCountryCode(string countryCode)
         {
-            Console.WriteLine($"Set country code {countryCode}");
+            Log.Debug("Set country code {countryCode}", countryCode);
 
             int result = set_country_code(new StringBuilder(countryCode));
 
@@ -681,6 +687,8 @@ namespace SharpBambu
             get => _selectedMachineDeviceID ?? get_user_selected_machine();
             set
             {
+                Log.Debug("Selected machine was set to {value}", value);
+
                 var result = set_user_selected_machine(new StringBuilder(value));
 
                 if (result != 0)
@@ -691,7 +699,6 @@ namespace SharpBambu
         }
 
         public bool LanMode { get; private set; } = false;
-        public int GcodeSequenceNumber { get; private set; } = 20000;
         public BambuEnums.ConnectStatus ConnectionStatus { get; private set; }
 
         public void SendMessageToPrinter(JObject jsonMessageObject, int qos = 0)
@@ -710,7 +717,7 @@ namespace SharpBambu
 
             if (LanMode)
             {
-                Console.WriteLine($"Sending message (via lan) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
+                Log.Verbose("Sending message (via lan) to printer with device id {SelectedMachineDeviceId} and qos {qos}", SelectedMachineDeviceId, qos);
 
                 var result = send_message_to_printer(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
@@ -719,7 +726,7 @@ namespace SharpBambu
             }
             else
             {
-                Console.WriteLine($"Sending message (via cloud) to printer with device id {SelectedMachineDeviceId} and qos {qos}");
+                Log.Verbose("Sending message (via cloud) to printer with device id {SelectedMachineDeviceId} and qos {qos}", SelectedMachineDeviceId, qos);
 
                 var result = send_message(new StringBuilder(SelectedMachineDeviceId), new StringBuilder(json), qos);
 
@@ -728,20 +735,17 @@ namespace SharpBambu
             }
         }
 
-        public void SetFan()
-        {
-            //std::string gcode = (boost::format("M106 P%1% S%2% \n") % (int)fan_type % (on_off ? 255 : 0)).str();
-        }
-
         public void SendGcode(string gcode)
         {
+            Log.Verbose("Send gcode {gcode}", gcode);
+
             var payload = new
             {
                 print = new
                 {
                     command = "gcode_line",
                     param = gcode,
-                    sequence_id = (GcodeSequenceNumber++).ToString(),
+                    sequence_id = (Printer.GcodeSequenceNumber++).ToString(),
                     user_id = UserId
                 }
             };
@@ -753,7 +757,7 @@ namespace SharpBambu
 
         public void RefreshConnection()
         {
-            Console.WriteLine("RefreshConnection (connect to mqtt)");
+            Log.Debug("Refreshing connection to mqtt");
 
             var result = refresh_connection();
 
@@ -763,7 +767,7 @@ namespace SharpBambu
 
         public void Subscribe(string module = "app")
         {
-            Console.WriteLine($"Subscribe to module {module}");
+            Log.Debug("Subscribing to Bambu Networking events for module/topic {module}", module);
 
             var result = start_subscribe(new StringBuilder(module));
 
@@ -772,7 +776,7 @@ namespace SharpBambu
         }
         public void Unsubscribe(string module = "app")
         {
-            Console.WriteLine($"Unsubscribe from module {module}");
+            Log.Debug("Unsubscribe from Bambu Networking events for module/topic {module}", module);
 
             var result = stop_subscribe(new StringBuilder(module));
 
@@ -798,10 +802,12 @@ namespace SharpBambu
         {
             SelectedMachineDeviceId = deviceId;
 
+            Log.Information("Sending {localGcodeFilePath} to printer SD Card", localGcodeFilePath);
+
             if (!File.Exists(localGcodeFilePath))
                 throw new Exception($"SendGcodeToSdCard: File does not exist: {localGcodeFilePath}");
 
-            Console.WriteLine($"SendGcodeToSdCard: calculating MD5 on {localGcodeFilePath}");
+            Log.Verbose("Calculating MD5 on {localGcodeFilePath}", localGcodeFilePath);
 
             using var md5 = MD5.Create();
             using var stream = File.OpenRead(localGcodeFilePath);
@@ -845,29 +851,30 @@ namespace SharpBambu
                 NullValueHandling = NullValueHandling.Ignore,
             });
 
-            Console.WriteLine(printParamsJson);
+            Log.Verbose(printParamsJson);
 
             var result = start_send_gcode_to_sdcard(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
             //var result = start_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
             //var result = start_local_print(printParamsJson, InstanceOnUpdateStatus_SendGcodeToSdCardDelegate, InstanceWasCancelled_SendGcodeToSdCardDelegate);
 
-            Console.WriteLine($"SendGcodeToSdCard: result={result}");            
+            Log.Debug("Send to SD Card submitted, result={result}", result);            
         }
 
         private void OnUpdateStatus_SendGcodeToSdCardEvent(int status, int code, string message)
         {
-            Console.WriteLine($"OnUpdateStatus_SendGcodeToSdCardEvent: status={status}, code={code}, message:");
-            Console.WriteLine(message);
+            Log.Debug("Send to SD, status={status}, progress={code} ({message})", status, code, message);
         }
         private bool WasCancelled_SendGcodeToSdCardEvent()
         {
-            Console.WriteLine($"WasCancelled_SendGcodeToSdCardEvent");
+            Log.Verbose("Not cancelled");
 
             return false; // was cancelled
         }
 
         public void WipeNozzle()
         {
+            Log.Debug("Sending nozzle wipe sequence");
+
             // test - do at your own risk
             // (below code intentionally not indented)
             SendGcode(@"

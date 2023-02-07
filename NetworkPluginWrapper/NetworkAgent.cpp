@@ -966,27 +966,18 @@ __declspec(dllexport) int start_send_gcode_to_sdcard(char* params_json, OnUpdate
 {
     OnUpdateStatusFnCS_ptr_send_gcode_to_sdcard = update_fn;
     WasCancelledFnCS_ptr_start_send_gcode_to_sdcard = cancel_fn;
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK1");
     
     std::string str_json = params_json;
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK2");
-
-    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: %1%") % params_json;
     json j = json::parse(str_json);
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK3");
-    
     PrintParams params = j.get<PrintParams>();
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK4");
     
     int ret = 0;
 	if (network_agent && start_send_gcode_to_sdcard_ptr) {
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK5");
 		ret = start_send_gcode_to_sdcard_ptr(network_agent, params, OnMsgArrivedFnWrapper_send_gcode_to_sdcard, WasCancelledFnWrapper_start_send_gcode_to_sdcard);
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK6");
+        //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK6");
 		BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : network_agent=%1%, ret=%2%, dev_id=%3%, task_name=%4%, project_name=%5%")
 			% network_agent % ret % params.dev_id % params.task_name % params.project_name;
 	}
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK7");
 	return ret;
 }
 
@@ -1015,18 +1006,9 @@ __declspec(dllexport) int start_local_print(char* params_json, OnUpdateStatusFnC
     OnUpdateStatusFnCS_ptr_start_local_print = update_fn;
     WasCancelledFnCS_ptr_start_local_print = cancel_fn;
 
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK1");
-    
     std::string str_json = params_json;
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK2");
-
-    //BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: %1%") % params_json;
     json j = json::parse(str_json);
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK3");
-    
     PrintParams params = j.get<PrintParams>();
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" : json: OK4");
-    
 
     int ret = 0;
     if (network_agent && start_local_print_ptr) {

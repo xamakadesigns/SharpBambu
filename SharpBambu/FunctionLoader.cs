@@ -1,5 +1,6 @@
 ﻿// https://codereview.stackexchange.com/questions/264452/simplify-loadlibrary-getprocaddress-helper-for-dynamic-parallel-dll-instantiatio
 
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -8,8 +9,10 @@ using System.Runtime.InteropServices;
 /// <summary>
 /// Helper function to dynamically load DLL contained functions on Windows only
 /// </summary>
-class FunctionLoader
+internal class FunctionLoader
 {
+    public static ILogger Log { get; private set; } = Serilog.Log.ForContext<FunctionLoader>();
+
     [DllImport("Kernel32.dll", CharSet = CharSet.Ansi)]
     private static extern IntPtr LoadLibrary(string path);
 

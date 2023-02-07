@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace SharpBambu
 {
     public class BambuPrinter
     {
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<BambuPrinter>();
+
         internal BambuPrinter()
         {
             AmsList.Add(new BambuAms("0"));
@@ -24,6 +27,7 @@ namespace SharpBambu
         public double NozzleTargetTemperature { get; private set; }
         public List <BambuAms> AmsList { get; } = new List<BambuAms>();
         public string CameraUrl { get; internal set; }
+        public int GcodeSequenceNumber { get; internal set; } = 20000;
 
         internal void ProcessMessage(PrinterMessage message)
         {
@@ -49,19 +53,20 @@ namespace SharpBambu
                         }
                     }
 
-                    Console.WriteLine($"Bed Temp {BedTemperature}/{BedTargetTemperature}, Extruder Temp {NozzleTemperature}/{NozzleTargetTemperature}, Chamber Temp {ChamberTemperature}, AMS0 Humidity {AmsList[0].Humidity}");
+                    Log.Verbose("Bed Temp {BedTemperature}/{BedTargetTemperature}, " +
+                        "Extruder Temp {NozzleTemperature}/{NozzleTargetTemperature}, " +
+                        "Chamber Temp {ChamberTemperature}, AMS0 Humidity {Ams0_Humidity}", BedTemperature, BedTargetTemperature, NozzleTemperature, NozzleTargetTemperature, ChamberTemperature, AmsList[0].Humidity);
+
                     break;
 
                 case "gcode_line":
-                    Console.WriteLine($"Gcode seq {message.SequenceId} result {message.Result}, reason {message.Reason}");
+                    Log.Verbose("Ack: Gcode seq {SequenceId} result {Result}, reason {Reason}", message.SequenceId, message.Result, message.Reason);
                     break;
 
                 default:
                     break;
 
             }
-
-            Console.Write("> ");
         }
     }
 }

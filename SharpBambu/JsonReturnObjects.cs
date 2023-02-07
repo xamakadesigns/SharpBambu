@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,19 @@ namespace SharpBambu
 {
     public class MessageDto
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<MessageDto>();
+
         [JsonProperty("print")]
         public PrinterMessage PrinterMessage { get; set; }
     }
 
     public class AmsRoot
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<AmsRoot>();
+
+
         [JsonProperty("ams")]
         public List<AmsEntry> AmsList { get; } = new List<AmsEntry>();
 
@@ -54,6 +62,9 @@ namespace SharpBambu
 
     public class AmsEntry
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<AmsEntry>();
+
         [JsonProperty("humidity")]
         public string Humidity { get; set; }
 
@@ -68,6 +79,9 @@ namespace SharpBambu
     }
     public class Ipcam
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Ipcam>();
+
         [JsonProperty("ipcam_dev")]
         public string IpcamDev { get; set; }
 
@@ -80,6 +94,9 @@ namespace SharpBambu
 
     public class LightsReport
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<LightsReport>();
+
         [JsonProperty("mode")]
         public string Mode { get; set; }
 
@@ -89,6 +106,8 @@ namespace SharpBambu
 
     public class Online
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Online>();
         [JsonProperty("ahb")]
         public bool? Ahb { get; set; }
 
@@ -98,6 +117,8 @@ namespace SharpBambu
 
     public class PrinterMessage
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<PrinterMessage>();
         [JsonProperty("ams")]
         public AmsRoot AmsRoot { get; set; }
 
@@ -269,6 +290,8 @@ namespace SharpBambu
 
     public class Tray
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Tray>();
         [JsonProperty("bed_temp")]
         public string BedTemp { get; set; }
 
@@ -323,6 +346,8 @@ namespace SharpBambu
 
     public class UpgradeState
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<UpgradeState>();
         [JsonProperty("ahb_new_version_number")]
         public string AhbNewVersionNumber { get; set; }
 
@@ -365,6 +390,8 @@ namespace SharpBambu
 
     public class Upload
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Upload>();
         [JsonProperty("file_size")]
         public int? FileSize { get; set; }
 
@@ -401,6 +428,8 @@ namespace SharpBambu
 
     public class Xcam
     {
+        [JsonIgnore]
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Xcam>();
         [JsonProperty("first_layer_inspector")]
         public bool? FirstLayerInspector { get; set; }
 

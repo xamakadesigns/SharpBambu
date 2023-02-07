@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace SharpBambu
 {
     public class BambuAms
     {
+        public static ILogger Log { get; private set; } = Serilog.Log.ForContext<BambuAms>();
+
         public double Humidity { get; private set; }
 
         internal BambuAms(string amsId)

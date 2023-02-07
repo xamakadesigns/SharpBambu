@@ -2,106 +2,120 @@
 // https://limbioliong.wordpress.com/2011/06/16/returning-strings-from-a-c-api/
 // See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using SharpBambu;
 using SharpBambuTestApp;
 
-var config = new BambuWrapperConfig().Load();
-
-var networkPlugin = new BambuNetworkPlugin();
-
-Console.WriteLine("Initialize Bambu Network Plugin");
-
-networkPlugin.InitializeNetworkPlugin(config.AutoUpdateDll);
-
-Console.WriteLine($"Version {networkPlugin.NetworkPluginVersion}");
-
-networkPlugin.SetConfigFolder(networkPlugin.BambuNetworkPluginConfigFolder);
-networkPlugin.SetCertFile("C:\\Program Files\\Bambu Studio\\resources\\cert", "slicer_base64.cer"); // todo fix path
-networkPlugin.InitializeNetworkAgentLog();
-networkPlugin.InitCallbacks();
-networkPlugin.SetCountryCode("US"); // todo dont hard code this
-
-networkPlugin.Start();
-//networkPlugin.Subscribe();
-networkPlugin.ConnectServer();
-
-// kinda pointless but it works
-//networkPlugin.StartSSDPDiscovery();
-//networkPlugin.StopSSDPDiscovery();
-
-networkPlugin.ConnectPrinter(config.DeviceId, config.IpAddress, config.Username, config.Password);
-
-try
+public class Program
 {
-    //Console.Clear();
-    //Console.WriteLine($"User ID: {networkPlugin.UserId}");
-    //Console.WriteLine($"User Name: {networkPlugin.UserName}");
-    //Console.WriteLine($"User Nickname: {networkPlugin.UserNickname}");
-    Console.WriteLine($"User Avatar: {networkPlugin.UserAvatar}");
-    Console.WriteLine($"User Logged in: {networkPlugin.IsUserLoggedIn}");
-    Console.WriteLine($"Cloud Server Connected: {networkPlugin.IsServerConnected}");
-    Console.WriteLine($"Selected Machine: {networkPlugin.SelectedMachineDeviceId}");
+    public static ILogger Log { get; private set; } = Serilog.Log.ForContext<Program>();
+    private static BambuNetworkPlugin NetworkPlugin { get; set; } = new BambuNetworkPlugin();
+    private static BambuWrapperConfig Config { get; set; } = new BambuWrapperConfig();
 
-    while (!networkPlugin.IsServerConnected)
+    public static void Main(string[] args)
     {
-        Thread.Sleep(1000);
-        Console.WriteLine("Waiting for cloud connection ...");
+        Config.Load();
+        
+        Log = Serilog.Log.ForContext<Program>();
+
+        NetworkPlugin.InitializeNetworkPlugin(Config.copyNetworkingDllFromBambuStudio);
+
+        NetworkPlugin.SetConfigFolder(NetworkPlugin.BambuNetworkPluginConfigFolder);
+        NetworkPlugin.SetCertFile("C:\\Program Files\\Bambu Studio\\resources\\cert", "slicer_base64.cer"); // todo fix path
+        NetworkPlugin.InitializeNetworkAgentLog();
+        NetworkPlugin.InitCallbacks();
+        NetworkPlugin.SetCountryCode("US"); // todo dont hard code this
+
+        NetworkPlugin.Start();
+        NetworkPlugin.ConnectServer();
+
+        // kinda pointless but it works
+        //networkPlugin.StartSSDPDiscovery();
+        //networkPlugin.StopSSDPDiscovery();
+
+        NetworkPlugin.ConnectPrinter(Config.DeviceId, Config.IpAddress, Config.Username, Config.Password);
+
+        try
+        {
+            Log.Debug("User ID: {UserId}", NetworkPlugin.UserId);
+            Log.Debug("User Name: {UserName}", NetworkPlugin.UserName);
+            Log.Debug("User Nickname: {UserNickName}", NetworkPlugin.UserNickname);
+            Log.Debug("User Avatar: {UserAvatar}", NetworkPlugin.UserAvatar);
+            Log.Debug("User Logged in: {IsUserLoggedIn}", NetworkPlugin.IsUserLoggedIn);
+            Log.Debug("Cloud Server Connected: {IsServerConnected}", NetworkPlugin.IsServerConnected);
+            Log.Debug("Selected Machine: {SelectedMachineDeviceId}", NetworkPlugin.SelectedMachineDeviceId);
+
+            Log.Information("Waiting for cloud connection ...");
+
+            while (!NetworkPlugin.IsServerConnected)
+            {
+                Thread.Sleep(1000);
+                Log.Debug("Waiting ...");
+            }
+
+            NetworkPlugin.RefreshConnection();
+            // networkPlugin.Subscribe();
+
+            if (!NetworkPlugin.LanMode)
+                NetworkPlugin.RefreshCameraUrl();
+
+            InputLoop();
+        }
+        catch (Exception ex)
+        {
+            // catch and print the exception
+            Log.Error(ex, "Unhandled exception");
+        }
+        finally
+        {
+            // dispose so that the log is flushed and we can read network plugin details later
+            NetworkPlugin.Dispose();
+        }
     }
 
-    Console.WriteLine("Setting up MQTT connection ...");
-
-    networkPlugin.RefreshConnection();
-    //networkPlugin.RefreshCameraUrl();
-
-
- 
-
-
-    while (true)
+    static void InputLoop()
     {
-        Console.Write("> ");
-        var gcode = Console.ReadLine();
-
-        if (string.IsNullOrEmpty(gcode))
-            break;
-
-        switch (gcode)
+        while (true)
         {
-            case "wipe":
-                Console.WriteLine("Sending wipe nozzle sequence as copied from Bambu Studio source.. do this at your own risk!");
-                networkPlugin.WipeNozzle();
-                break;
+            try
+            {
+                Console.Write("> ");
+                var gcode = Console.ReadLine();
 
-            case "sendtest":
-                Console.WriteLine("Testing send gcode");
-                File.WriteAllText("c:\\temp\\test.gcode", "G28\n");
+                switch (gcode)
+                {
+                    case "wipe":
+                        Log.Warning("Sending wipe nozzle sequence as copied from Bambu Studio source.. do this at your own risk!");
+                        NetworkPlugin.WipeNozzle();
+                        break;
 
-            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project name", "task name", "preset name", "config file name", "", "", false, false, false, false, false, false, "lan");
-            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
-            //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test1234.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name", "", "", "", "", "", false, false, false, false, false, false, "lan");
+                    case "send-sd":
+                        Log.Information("Testing send gcode");
+                        File.WriteAllText("c:\\temp\\test.gcode", "G28\n");
 
-            networkPlugin.SendGcodeToSdCard("f:\\temp2\\nut.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "nut2.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
-            
+                        //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project name", "task name", "preset name", "config file name", "", "", false, false, false, false, false, false, "lan");
+                        //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
+                        //networkPlugin.SendGcodeToSdCard("c:\\temp\\test.gcode", "test1234.gcode", config.DeviceId, config.IpAddress, config.Username, config.Password, 0, "project_name", "", "", "", "", "", false, false, false, false, false, false, "lan");
 
-                break;
+                        NetworkPlugin.SendGcodeToSdCard("f:\\temp2\\nut.gcode", "test.gcode", Config.DeviceId, Config.IpAddress, Config.Username, Config.Password, 0, "nut2.gcode", "taskname", "Generic PETG", "configfilename", "F(01) -> A(02)", "F(01) -> A(02)", true, false, false, true, false, false, "lan");
 
-            default:
-                networkPlugin.SendGcode(gcode + "\n");
-                break;
+                        break;
+
+                    case "q":
+                    case "quit":
+                    case "exit":
+                        return;
+
+                    default:
+                        NetworkPlugin.SendGcode(gcode + "\n");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // catch and print the exception
+                Log.Error(ex, "Something went wrong ...");
+            }
         }
     }
 }
-catch (Exception ex)
-{
-    // catch and print the exception
-    Console.WriteLine("Exception:");
-    Console.WriteLine(ex);
-}
-finally
-{
-    Console.WriteLine("Disposing Bambu Network Plugin");
-
-    // dispose so that the log is flushed and we can read network plugin details later
-    networkPlugin.Dispose();
-}
-
