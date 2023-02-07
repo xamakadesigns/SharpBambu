@@ -2,8 +2,8 @@
 // https://limbioliong.wordpress.com/2011/06/16/returning-strings-from-a-c-api/
 // See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Configuration;
+using SharpBambu;
 using SharpBambuTestApp;
-using Test;
 
 var config = new BambuWrapperConfig().Load();
 

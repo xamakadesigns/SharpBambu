@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBambuTestApp
+namespace SharpBambu
 {
     public class BambuPrinter
     {

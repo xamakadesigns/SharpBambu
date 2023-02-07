@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SharpBambuTestApp;
+using SharpBambu;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,9 +11,8 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using static SharpBambuTestApp.BambuStructs;
 
-namespace Test
+namespace SharpBambu
 {
     public class BambuNetworkPlugin : IDisposable
     {

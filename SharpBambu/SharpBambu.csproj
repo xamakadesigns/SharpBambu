@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -12,20 +12,6 @@
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="echo $(ProjectDir)&#xD;&#xA;copy $(ProjectDir)\..\NetworkPluginWrapper\Release\NetworkPluginWrapper.dll $(ProjectDir)\bin\Debug\net6.0\NetworkPluginWrapper.dll" />
   </Target>
-
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-    <None Remove="appsettings.secret.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.secret.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
@@ -39,7 +25,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <ReferenceOutputAssembly>True</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\SharpBambu\SharpBambu.csproj" />
   </ItemGroup>
 
 </Project>
